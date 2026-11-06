@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Not: Uygulama INTERNET izni ISTEMEZ. Yazilan hicbir metin cihazdan disari cikamaz.
+  Senkron, kullanicinin sectigi bir dosya (Drive/Syncthing klasoru) uzerinden yapilir.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Dosya yoneticisinden .yml / .json acma ve "Paylas" ile gonderme -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/x-yaml" />
+                <data android:mimeType="application/yaml" />
+                <data android:mimeType="text/yaml" />
+                <data android:mimeType="text/x-yaml" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+
+        <!-- Test ve tanilama ekrani (kabul testleri, tani kaydi) -->
+        <activity
+            android:name=".TestActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation"
+            android:exported="true"
+            android:label="RadExpand test"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Chromium testi ayri surecte: gercek Chrome gibi klavye servisinden bagimsiz -->
+        <activity
+            android:name=".WebTestActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation"
+            android:exported="false"
+            android:label="Chrome motoru testi"
+            android:process=":web"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Bildirim panelinde ac/kapa kutucugu -->
+        <service
+            android:name=".QuickTile"
+            android:exported="true"
+            android:icon="@drawable/ic_tile"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".RadExpandIme"
+            android:exported="true"
+            android:label="@string/ime_name"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
+        </service>
+    </application>
+</manifest>

@@ -1,0 +1,27 @@
+# Derleme ciktilari
+build/
+.gradle/
+.kotlin/
+dist/
+*.apk
+*.aab
+
+# Yerel ayarlar (bilgisayara ozgu yollar)
+local.properties
+.idea/
+*.iml
+
+# Imza anahtari ve sifreleri - ASLA depoya girmez
+keystore/
+*.jks
+*.keystore
+keystore.properties
+
+# Yerel calisma notlari (depo disi)
+progress.md
+CLAUDE.md
+.claude/
+
+# Isletim sistemi
+.DS_Store
+Thumbs.db
