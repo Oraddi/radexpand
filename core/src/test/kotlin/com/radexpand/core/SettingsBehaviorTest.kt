@@ -18,6 +18,27 @@ class SettingsBehaviorTest {
     private fun run(s: AppSettings, seq: String, sc: List<Shortcut> = base, ed: FakeEditor = FakeEditor()) =
         Sim(sc, ed, cfg(s)).type(seq).text
 
+    // ---------------------------------------------------------------- README ornekleri birebir
+
+    @Test fun `README ornekleri yazildigi gibi calisir`() {
+        val tr = listOf(Shortcut("rp", "rapor"))
+        val s = AppSettings()
+        assertEquals("rapor ", run(s, "rp␣", tr))
+        assertEquals("rapor\n", run(s, "rp⏎", tr))
+        assertEquals("raporlar", run(s, "rp⇥lar", tr))
+        assertEquals("turp ", run(s, "turp␣", tr))
+        assertEquals("Rapor ", run(s, "Rp␣", tr))
+        assertEquals("rapor ", run(AppSettings(caseMode = CaseMode.KEEP_TEXT), "Rp␣", tr))
+        assertEquals("rp ", run(s, "rp␣⌫", tr))
+
+        val en = listOf(Shortcut("rpt", "report"))
+        assertEquals("report ", run(s, "rpt␣", en))
+        assertEquals("reports", run(s, "rpt⇥s", en))
+        assertEquals("excerpt ", run(s, "excerpt␣", en))
+        assertEquals("Report ", run(s, "Rpt␣", en))
+        assertEquals("report ", run(AppSettings(caseMode = CaseMode.KEEP_TEXT), "Rpt␣", en))
+    }
+
     // ---------------------------------------------------------------- A1 tus davranislari
 
     @Test fun `varsayilan ayarlar eski davranisla ayni`() {
@@ -83,6 +104,10 @@ class SettingsBehaviorTest {
     @Test fun `buyuk harf modlari`() {
         assertEquals("Ri ", run(AppSettings(caseMode = CaseMode.OFF), "Ri␣"))
         assertEquals("Hiperintensite ", run(AppSettings(caseMode = CaseMode.CAPITAL), "Ri␣"))
+        // "Metin olduğu gibi": büyük harfle yazılan kısayol genişler, metin değişmeden yazılır
+        assertEquals("hiperintensite ", run(AppSettings(caseMode = CaseMode.KEEP_TEXT), "Ri␣"))
+        assertEquals("NSİ ", run(AppSettings(caseMode = CaseMode.KEEP_TEXT), "NSİ␣"))
+        assertEquals("hiperintensite ", run(AppSettings(caseMode = CaseMode.KEEP_TEXT), "ri␣"))
         assertEquals("NSİ ", run(AppSettings(caseMode = CaseMode.CAPITAL), "NSİ␣"))
         assertEquals("NORMAL SINIRLARDA İNCELEME ", run(AppSettings(caseMode = CaseMode.FULL), "NSİ␣"))
         assertEquals("HİPERİNTENSİTE ", run(AppSettings(minUpperLetters = 2), "Rİ␣"))

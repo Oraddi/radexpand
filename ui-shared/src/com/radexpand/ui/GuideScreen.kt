@@ -48,7 +48,7 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
                 "Kısa bir harf grubu yazıp bir tuşa basarsınız, uzun metne dönüşür. Klavyeniz değişmez: harfler her zaman olduğu gibi yazılır; RadExpand yalnızca tanıdığı bir kısayolu görünce onu metinle değiştirir.",
                 "You type a few letters and press a key; they turn into a longer text. Your keyboard does not change: letters are typed as usual; RadExpand only replaces a shortcut it recognises.",
             ),
-            listOf(t("ri", "hyi") + " ␣" to t("hiperintens ", "hyperintense ")),
+            listOf(t("rp ␣", "rpt ␣") to t("rapor·", "report·")),
         )
         GuideCard(
             "2",
@@ -58,9 +58,9 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
                 "Expansion happens with the key you press after the shortcut. Space adds a space, Enter starts a new line, Tab adds nothing: the cursor stays right after the text so you can add a suffix. Key behaviour can be changed in Settings.",
             ),
             listOf(
-                t("ri", "hyi") + " ␣" to t("hiperintens·", "hyperintense·"),
-                t("ri", "hyi") + " ⏎" to t("hiperintens⏎", "hyperintense⏎"),
-                t("ri ⇥ ler", "hyi ⇥ ly") to t("hiperintensler", "hyperintensely"),
+                t("rp ␣", "rpt ␣") to t("rapor·", "report·"),
+                t("rp ⏎", "rpt ⏎") to t("rapor⏎", "report⏎"),
+                t("rp ⇥ lar", "rpt ⇥ s") to t("raporlar", "reports"),
             ),
         )
         GuideCard(
@@ -76,17 +76,17 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
             "4",
             t("Kelime sınırı: yanlışlıkla genişlemez", "Word boundary: no accidental expansion"),
             t(
-                "Kısayol ancak ayrı bir kelimenin başındaysa genişler. Böylece \"birinci\" yazarken içindeki \"ri\" genişlemez. Kesme işaretinden sonraki ek de korunur (\"MR'dan\"). Bir şey yanlışlıkla genişlerse hemen Backspace'e basın: yazdığınız geri gelir.",
-                "A shortcut expands only at the start of a separate word, so typing \"Ferris\" does not expand \"ri\" inside it. If something expands by mistake, press Backspace right away: what you typed comes back.",
+                "Kısayol ancak ayrı bir kelime olarak yazıldığında genişler. Böylece \"turp\" yazarken sonundaki \"rp\" genişlemez. Kesme işaretinden sonraki ek de korunur (\"Ankara'dan\"). Bir şey yanlışlıkla genişlerse hemen Backspace'e basın: yazdığınız geri gelir.",
+                "A shortcut expands only at the start of a separate word, so typing \"excerpt\" does not expand the \"rpt\" at its end. If something expands by mistake, press Backspace right away: what you typed comes back.",
             ),
-            listOf(t("birinci ␣", "Ferris ␣") to t("birinci· (değişmez)", "Ferris· (unchanged)"), t("ri ␣ ⌫", "hyi ␣ ⌫") to t("ri·", "hyi·")),
+            listOf(t("turp ␣", "excerpt ␣") to t("turp· (değişmez)", "excerpt· (unchanged)"), t("rp ␣ ⌫", "rpt ␣ ⌫") to t("rp·", "rpt·")),
         )
         GuideCard(
             "5",
             t("İyi kısayol nasıl seçilir?", "Choosing good shortcuts"),
             t(
-                "Kısa ama tahmin edilebilir olsun: hiper → r, hipo → o, intens → i (ri, oi, rd, od). Aynı ailedekiler ortak başlasın: iz → izlendi, izş → izlenmiştir, izk → izlenmektedir. Gerçek kelimelerden ve birimlerden (ön, düz, cc, ml) kaçının; kullanırsanız \"Yalnızca Tab\" yapın — RadExpand bu durumda sizi uyarır.",
-                "Short but predictable: hyper → hy, hypo → ho, intense → i (hyi, hoi). Members of a family share a start. Avoid real words and units (cc, ml); if you use them, set them to \"Tab only\" — RadExpand warns you.",
+                "Kısa ama tahmin edilebilir olsun: kelimenin ünsüzleri iyi bir başlangıçtır (rapor → rp, toplantı → tpl). Aynı ailedekiler ortak başlasın: iz → izlendi, izş → izlenmiştir, izk → izlenmektedir. Gerçek kelimelerden ve birimlerden (ön, düz, cc, ml) kaçının; kullanırsanız \"Yalnızca Tab\" yapın — RadExpand bu durumda sizi uyarır.",
+                "Short but predictable: a word's consonants are a good start (report → rpt, meeting → mtg). Members of a family share a start. Avoid real words and units (cc, ml); if you use them, set them to \"Tab only\" — RadExpand warns you.",
             ),
             emptyList(),
         )
@@ -94,10 +94,10 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
             "6",
             t("Büyük harf", "Capitals"),
             t(
-                "Cümle başında kısayolu büyük harfle yazın, metin de büyük harfle başlar. Tamamı büyük yazım yalnızca uzun kısayollarda çalışır; \"CC\" gibi kısaltmalar bozulmaz.",
-                "Type the shortcut with a capital at the start of a sentence and the text starts with a capital. All-caps works only for longer shortcuts, so abbreviations like \"CC\" stay as they are.",
+                "Cümle başında kısayolu büyük harfle yazın, metin de büyük harfle başlar. Tamamı büyük yazım yalnızca uzun kısayollarda çalışır; \"CC\" gibi kısaltmalar bozulmaz. İsterseniz Ayarlar'dan metnin olduğu gibi yazılmasını ya da büyük harfle yazılan kısayolun hiç genişlememesini seçebilirsiniz.",
+                "Type the shortcut with a capital at the start of a sentence and the text starts with a capital. All-caps works only for longer shortcuts, so abbreviations like \"CC\" stay as they are. In Settings you can instead keep the text as saved, or not expand capitalised shortcuts at all.",
             ),
-            listOf(t("Ri ␣", "Hyi ␣") to t("Hiperintens·", "Hyperintense·"), "CC ␣" to "CC·"),
+            listOf(t("Rp ␣", "Rpt ␣") to t("Rapor·", "Report·"), "CC ␣" to "CC·"),
         )
         GuideCard(
             "7",
@@ -106,7 +106,7 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
                 "Metne \$|\$ koyduğunuz yerler doldurma alanıdır: genişletmeden sonra imleç ilk alanda durur, Tab ile sıradakine geçersiniz. {tarih} ve {saat} o anki tarih ve saatle değişir.",
                 "The places where you put \$|\$ are fill-in fields: after expansion the cursor stops at the first one and Tab moves to the next. {date} and {time} become the current date and time.",
             ),
-            listOf(t("kd ␣ 152 ⇥ 118", "lsz ␣ 15 ⇥ 11") to t("Karaciğer … 152 mm, dalak … 118 mm …", "The liver measures 15 cm and the spleen 11 cm …")),
+            listOf(t("tpl ␣ 12 Mart ⇥ 3", "mtg ␣ 12 March ⇥ 3") to t("Toplantı 12 Mart tarihinde, 3 salonunda …", "The meeting will be held on 12 March in room 3.")),
         )
         GuideCard(
             "8",
@@ -133,7 +133,7 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(t("Şimdi deneyin", "Try it now"), fontWeight = FontWeight.Bold)
-                Hint(t("Örnek radyoloji paketi yukarıdaki örneklerin hepsini içerir. İstemediğinizde \"Örnek:\" kategorisini silebilirsiniz.", "The sample radiology pack contains all the examples above. Delete the \"Sample:\" categories when you no longer need them."))
+                Hint(t("Örnek paket yukarıdaki örneklerin hepsini içerir. İstemediğinizde \"Örnek:\" kategorisini silebilirsiniz.", "The sample pack contains all the examples above. Delete the \"Sample:\" categories when you no longer need them."))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = onImportSample) { Text(t("Örnek paketi içe aktar", "Import sample pack")) }
                     OutlinedButton(onClick = onTryIt) { Text(t("Deneme alanını aç", "Open the practice area")) }

@@ -16,6 +16,9 @@ object SamplePack {
         val a = "Örnek: Abdomen"
         val s = "Örnek: Şablon"
         return listOf(
+            // rehberdeki genel ornekler
+            r("rp", "rapor", g, note = "Tab ile ek yazın: rp ⇥ lar → raporlar"),
+            r("tpl", "Toplantı \$|\$ tarihinde, \$|\$ salonunda yapılacaktır.", s, note = "Tab ile sonraki alana geçin"),
             // hiper = r, hipo = o; intens = i, dens = d, ekojen = e
             r("ri", "hiperintens", g, note = "hiper → r, intens → i"),
             r("oi", "hipointens", g),
@@ -59,6 +62,9 @@ object SamplePack {
         val n = "Sample: Neuro"
         val s = "Sample: Template"
         return listOf(
+            // general examples used in the guide
+            r("rpt", "report", g, note = "Add a suffix with Tab: rpt ⇥ s → reports"),
+            r("mtg", "The meeting will be held on \$|\$ in room \$|\$.", s, note = "Press Tab to go to the next field"),
             r("hyi", "hyperintense", g, note = "hyper → hy, intense → i"),
             r("hoi", "hypointense", g),
             r("hyd", "hyperdense", g),

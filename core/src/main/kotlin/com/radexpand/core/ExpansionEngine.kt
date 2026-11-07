@@ -466,6 +466,8 @@ class ExpansionEngine(
                                 (caseMode != CaseMode.FULL || cand.trigger.count { it.isLetter() } < minUpperLetters)
                             ) style = null
                             if (style != null) sc = cand
+                            // "Olduğu gibi": "Ri" de genisler ama metin kayittaki gibi yazilir (Ri -> hiperintens).
+                            if (caseMode == CaseMode.KEEP_TEXT) style = null
                         }
                     }
                 }

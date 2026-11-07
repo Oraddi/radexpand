@@ -1,5 +1,15 @@
 # Değişiklikler / Changelog
 
+## 0.3.1
+
+**Türkçe**
+- Ayarlar → "Kısayol büyük harfle yazılınca" bölümüne yeni seçenek: **Metin olduğu gibi**. `Rp` + Space yazınca `Rapor` değil, kayıttaki gibi `rapor` yazılır. Diğer seçenekler: Genişlemesin / İlk harf büyük / İlk harf + tamamı büyük.
+- "Nasıl kullanılır" rehberinde ve açıklama sayfasında daha genel örnekler (`rp` → rapor, `rpt` → report); örnek pakete bu kısayollar ve bir toplantı şablonu eklendi.
+
+**English**
+- New option in Settings → "When a shortcut is typed with capitals": **Text as saved**. Typing `Rpt` + Space gives `report` exactly as saved instead of `Report`. Other options: Don't expand / First letter capital / First letter + all caps.
+- More general examples in the "How to use" guide and on the project page (`rp` → rapor, `rpt` → report); the sample pack now includes them plus a meeting template.
+
 ## 0.3.0 — ilk herkese açık sürüm / first public release
 
 **Türkçe**

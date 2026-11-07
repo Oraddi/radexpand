@@ -151,8 +151,12 @@ enum class KeyAction {
     EXPAND_ONLY,
 }
 
+/**
+ * Kisayol buyuk harfle yazildiginda:
+ * OFF: genislemez · KEEP_TEXT: genisler, metin oldugu gibi · CAPITAL: ilk harf buyuk · FULL: tamami buyuk de.
+ */
 @Serializable
-enum class CaseMode { OFF, CAPITAL, FULL }
+enum class CaseMode { OFF, KEEP_TEXT, CAPITAL, FULL }
 
 @Serializable
 enum class ThemeMode { SYSTEM, LIGHT, DARK }

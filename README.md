@@ -2,8 +2,8 @@
 
 **[Türkçe](#türkçe) · [English](#english)**
 
-Fiziksel klavye için çevrimdışı metin genişletici: Android tablet + Windows. Radyoloji raporları için yapıldı, her türlü metinde çalışır.
-*Offline text expander for physical keyboards: Android tablets + Windows. Built for radiology reports, works for any text.*
+Fiziksel klavye için çevrimdışı metin genişletici: **Android** ve **Windows**.
+*Offline text expander for physical keyboards: **Android** and **Windows**.*
 
 [![Son sürüm / Latest release](https://img.shields.io/github/v/release/Oraddi/radexpand?label=release)](https://github.com/Oraddi/radexpand/releases/latest)
 [![Lisans / License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
@@ -18,27 +18,31 @@ Fiziksel klavye için çevrimdışı metin genişletici: Android tablet + Window
 ## Türkçe
 
 ### Ne yapar?
-Kısa bir harf grubu yazıp bir tuşa basarsınız, uzun metne dönüşür:
+Sık yazdığınız kelime ve cümleleri kısa harf gruplarıyla yazarsınız. Bir tuşa basınca kısayol tam metne dönüşür.
+Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her programda, her türlü metinde çalışır.
+
+Örnek: kısayol `rp` → metin `rapor`
 
 | Yazdığınız | Sonuç |
 |---|---|
-| `ri` + **Space** | `hiperintens␣` |
-| `ri` + **Enter** | `hiperintens` + yeni satır |
-| `ri` + **Tab** + `ler` | `hiperintensler` (Tab hiçbir şey eklemez, imleç metnin sonunda kalır) |
-| `birinci` + Space | `birinci␣`: kelimenin içindeki `ri` **genişlemez** |
-| `Ri` + Space | `Hiperintens␣`: büyük harf korunur |
+| `rp` + **Space** | `rapor␣` |
+| `rp` + **Enter** | `rapor` + yeni satır |
+| `rp` + **Tab** + `lar` | `raporlar`: Tab hiçbir şey eklemez, imleç metnin sonunda kalır ve ek yazabilirsiniz |
+| `turp` + Space | `turp␣`: kısayol bir kelimenin parçasıysa **genişlemez** |
+| `Rp` + Space | `Rapor␣` (Ayarlar'dan `rapor␣` olarak bırakmayı da seçebilirsiniz) |
 | genişlemeden hemen sonra **Backspace** | yazdığınız kısayol geri gelir |
 
 - **Tamamen çevrimdışı.** Android uygulamasının internet izni yoktur; yazdıklarınız cihazdan çıkamaz.
-- **Espanso** dosyalarını (`base.yml`) önizlemeyle içe aktarır ve Espanso biçiminde dışa aktarır.
-- **Tablet ↔ Windows senkronu** ortak bir dosya üzerinden yapılır (ör. Google Drive klasörü). Son değişiklik kazanır, silmeler de taşınır.
-- **Şablonlar:** `$|$` imlecin duracağı yer, birden fazla `$|$` varsa Tab ile sonrakine geçilir. `{tarih}` ve `{saat}` değişkenleri desteklenir.
+- **Espanso** dosyalarını (`.yml`) önizlemeyle içe aktarır ve Espanso biçiminde dışa aktarır.
+- **Android ↔ Windows senkronu** ortak bir dosya üzerinden yapılır (ör. Google Drive klasörü). Son değişiklik kazanır, silmeler de taşınır.
+- **Şablonlar:** `$|$` imlecin duracağı yeri gösterir. Birden fazla `$|$` varsa Tab ile sonrakine geçilir. `{tarih}` ve `{saat}` değişkenleri de kullanılabilir.
+  Örnek: `Toplantı $|$ tarihinde, $|$ salonunda yapılacaktır.`
 - **Her şey Ayarlar'dan değiştirilebilir:**
-  - Space / Enter / Tab'ın görevi ve özel genişletme tuşu (ör. F2);
-  - kelime kuralları, büyük harf;
+  - Space / Enter / Tab'ın görevi ve isteğe bağlı özel genişletme tuşu (ör. F2);
+  - kelime kuralları ve büyük harf davranışı;
   - tema, renk, yazı boyutu;
-  - yedekler, uygulama bazında kapatma.
-- Uygulamanın içinde kısa bir **"Nasıl kullanılır"** rehberi ve isteğe bağlı **örnek radyoloji paketi** vardır.
+  - yedekler ve uygulama bazında kapatma.
+- Uygulamanın içinde kısa bir **"Nasıl kullanılır"** rehberi ve isteğe bağlı bir **örnek kısayol paketi** vardır.
 - Arayüz Türkçe ve İngilizcedir; dil ilk açılışta sorulur.
 
 ### İndirme
@@ -46,95 +50,119 @@ Kısa bir harf grubu yazıp bir tuşa basarsınız, uzun metne dönüşür:
 
 | Dosya | Ne için |
 |---|---|
-| `RadExpand-x.y.z.apk` | Android 8+ tablet/telefon (fiziksel klavyeyle) |
+| `RadExpand-x.y.z.apk` | Android 8 ve üstü (fiziksel klavyeyle) |
 | `RadExpand-x.y.z.msi` | Windows 10/11 kurulum dosyası (yönetici izni gerekmez) |
 | `RadExpand-Windows-x.y.z.zip` | Windows taşınabilir sürüm (kurulumsuz) |
 
 ### Android kurulumu
-1. APK'yı tablette açın → **Yükle**. "Bilinmeyen uygulama" izni sorulursa bu kaynağa izin verin.
-2. RadExpand'i açın, dili seçin. Kurulum ekranındaki iki adımı yapın: **klavye ayarlarında RadExpand'i açın** → **klavye olarak RadExpand'i seçin**.
+1. APK'yı cihazda açın → **Yükle**. "Bilinmeyen uygulama" izni sorulursa bu kaynağa izin verin.
+2. RadExpand'i açın ve dili seçin. Ardından kurulum ekranındaki iki adımı yapın:
+   1. klavye ayarlarında RadExpand'i açın;
+   2. klavye olarak RadExpand'i seçin.
+
    Android her klavye için "yazdıklarınızı toplayabilir" uyarısı gösterir; RadExpand'in internet izni yoktur.
 3. Türkçe karakterler yanlış çıkarsa: **Ayarlar → Fiziksel klavye düzeni → Türkçe Q**.
 4. Fiziksel klavye bağlı değilken ekranda küçük bir çubuk görünür; oradan normal klavyenize geçebilirsiniz.
 
-**Otomatik güncelleme (isteğe bağlı):** Uygulamanın kendisi internete çıkmaz. Yeni sürümleri otomatik almak için [Obtainium](https://obtainium.imranr.dev/) uygulamasına bu sayfanın adresini (`https://github.com/Oraddi/radexpand`) ekleyin. Yeni sürüm yayımlandığında Obtainium haber verir. Güncellemeler aynı imzayla eskisinin üzerine kurulur, kısayollarınız kalır.
+**Otomatik güncelleme (isteğe bağlı):** Uygulamanın kendisi internete çıkmaz. Yeni sürümleri otomatik almak için [Obtainium](https://obtainium.imranr.dev/) uygulamasına bu sayfanın adresini (`https://github.com/Oraddi/radexpand`) ekleyin.
+Güncellemeler eski sürümün üzerine kurulur ve kısayollarınız kalır.
 
 ### Windows kurulumu
 1. `.msi` dosyasını çalıştırın. SmartScreen "tanınmayan uygulama" derse **Ek bilgi → Yine de çalıştır** seçin (uygulama ücretli bir kod imzası taşımaz).
 2. RadExpand sistem tepsisinde çalışır. Pencereyi kapatınca arka planda devam eder; sağ tık menüsünde Aç / Duraklat / Çıkış vardır.
-3. **Espanso kullanıyorsanız kapatın.** İkisi birlikte çalışırsa kısayollar iki kez genişler (RadExpand bunu fark edip uyarır).
-4. **Güncelleme:** Açılışta ve günde bir kez GitHub'a tek bir küçük istek gönderilir; yazdığınız hiçbir şey gönderilmez. Yeni sürüm varsa **Ayarlar → Güncelleme → İndir ve kur** çıkar. Sormadan kurmaz, istenirse kontrol tamamen kapatılabilir.
+3. **Başka bir metin genişletici (ör. Espanso) kullanıyorsanız kapatın.** İkisi birlikte çalışırsa kısayollar iki kez genişler; RadExpand bunu fark edip uyarır.
+4. **Güncelleme:** Açılışta ve günde bir kez GitHub'a tek bir küçük istek gönderilir; yazdığınız hiçbir şey gönderilmez.
+   Yeni sürüm varsa **Ayarlar → Güncelleme → İndir ve kur** çıkar. Sormadan kurmaz ve kontrol ayarlardan kapatılabilir.
 
 ### Espanso'dan geçiş
-**Aktar → Dosya seç** → `base.yml` (Windows'ta `%APPDATA%\espanso\match` klasörü kendiliğinden açılır).
-Önizlemede kaç kısayolun geleceğini, uyarıları ve çakışmaları görürsünüz. Aynı dosyayı tekrar aktarmak kayıtları çoğaltmaz, orijinal dosya da değişmez.
+**Aktar → Dosya seç** → Espanso `.yml` dosyanız. Windows'ta `%APPDATA%\espanso\match` klasörü kendiliğinden açılır.
+Önizlemede kaç kısayolun geleceğini, uyarıları ve çakışmaları görürsünüz. Aynı dosyayı tekrar aktarmak kayıtları çoğaltmaz; orijinal dosya da değişmez.
 
 ### Sınırlamalar
 - Yalnızca **fiziksel klavye** ile çalışır; ekran klavyesiyle yazarken genişletme yapılmaz.
-- Windows'ta **yönetici olarak çalışan** programlarda (bazı RIS/PACS istemcileri) RadExpand'in de yönetici olarak çalıştırılması gerekir.
-- Windows parola alanlarını genel olarak ayırt edemez; parola yöneticinizi **Ayarlar → Uygulama bazında kapatma**'dan kapatın. Android'de parola alanlarında genişletme varsayılan olarak kapalıdır.
-- **Test durumu:** Android 15 tablet emülatöründe (Chrome dahil) ve Windows 11'de otomatik testlerle denendi. Gerçek Samsung tablet ve Google Dokümanlar ile henüz geniş kullanım deneyimi yoktur. Sorun görürseniz [bildirin](https://github.com/Oraddi/radexpand/issues).
+- Windows'ta **yönetici olarak çalışan** programlarda RadExpand'in de yönetici olarak çalıştırılması gerekir.
+- Parola alanları:
+  - Windows bunları genel olarak ayırt edemez; parola yöneticinizi **Ayarlar → Uygulama bazında kapatma**'dan kapatın.
+  - Android'de parola alanlarında genişletme varsayılan olarak kapalıdır.
+- **Test durumu:** Android emülatöründe (Chrome dahil) ve Windows 11'de otomatik testlerle denendi. Farklı cihaz ve uygulamalarda kullanım deneyimi henüz sınırlıdır.
+  Sorun görürseniz [bildirin](https://github.com/Oraddi/radexpand/issues).
 
-> **Önemli:** RadExpand bir **tıbbi cihaz değildir**. Tanı veya tedavi kararı vermez; yalnızca yazmayı hızlandırır. Oluşan metni kontrol etmek kullanıcının sorumluluğundadır.
+> **Önemli:** RadExpand bir **tıbbi cihaz değildir** ve hiçbir konuda karar vermez; yalnızca yazmayı hızlandırır. Oluşan metni kontrol etmek kullanıcının sorumluluğundadır.
 
 ---
 
 ## English
 
 ### What it does
-Type a short abbreviation, press a key, get the full text:
+Type short abbreviations for words and sentences you use often. Press a key and the abbreviation turns into the full text.
+Made for repetitive text such as reports, templates and correspondence. Works in any program, with any kind of text.
+
+Example: shortcut `rpt` → text `report`
 
 | You type | Result |
 |---|---|
-| `hyi` + **Space** | `hyperintense␣` |
-| `hyi` + **Enter** | `hyperintense` + new line |
-| `hyi` + **Tab** + `ly` | `hyperintensely`: Tab adds nothing, the cursor stays right after the text so you can add a suffix |
-| `xhyi` + Space | `xhyi␣`: `hyi` inside a longer word does **not** expand |
-| `Hyi` + Space | `Hyperintense␣`: capitalisation is kept |
+| `rpt` + **Space** | `report␣` |
+| `rpt` + **Enter** | `report` + new line |
+| `rpt` + **Tab** + `s` | `reports`: Tab adds nothing; the cursor stays right after the text so you can add a suffix |
+| `excerpt` + Space | `excerpt␣`: a shortcut that is part of a word does **not** expand |
+| `Rpt` + Space | `Report␣` (or keep it as `report␣`, set in Settings) |
 | **Backspace** right after an expansion | your abbreviation comes back |
 
 - **Fully offline.** The Android app has no internet permission; what you type cannot leave the device.
-- Imports **Espanso** files (`base.yml`) with a preview, and exports to Espanso format.
-- **Tablet ↔ Windows sync** through a shared file (e.g. a Google Drive folder). The latest change wins; deletions are synced too.
-- **Templates:** `$|$` marks where the cursor stops. With several `$|$` marks, Tab jumps to the next one. Supports `{date}` / `{time}` variables.
+- Imports **Espanso** files (`.yml`) with a preview and exports to Espanso format.
+- **Android ↔ Windows sync** through a shared file (e.g. a Google Drive folder). The latest change wins; deletions are synced too.
+- **Templates:** `$|$` marks where the cursor stops. With several `$|$` marks, Tab jumps to the next one. You can also use `{date}` and `{time}` variables.
+  Example: `The meeting will be held on $|$ in room $|$.`
 - **Everything is configurable in Settings:**
-  - what Space / Enter / Tab do, plus a custom expand key (e.g. F2);
+  - what Space / Enter / Tab do, plus an optional custom expand key (e.g. F2);
   - word rules and capitalisation;
   - theme, colour and text size;
   - backups and per-app disable.
-- Includes a short in-app **"How to use"** guide and an optional **sample radiology pack**.
-- The interface is in Turkish and English; it asks which one at first launch.
+- Includes a short in-app **"How to use"** guide and an optional **sample shortcut pack**.
+- The interface is in Turkish and English; you choose the language at first launch.
 
 ### Download
 [**Latest release →**](https://github.com/Oraddi/radexpand/releases/latest)
 
 | File | For |
 |---|---|
-| `RadExpand-x.y.z.apk` | Android 8+ tablet/phone with a physical keyboard |
+| `RadExpand-x.y.z.apk` | Android 8 or later, with a physical keyboard |
 | `RadExpand-x.y.z.msi` | Windows 10/11 installer (no admin rights needed) |
 | `RadExpand-Windows-x.y.z.zip` | Windows portable (no install) |
 
 ### Android setup
-1. Open the APK on the tablet and tap **Install**. Allow installs from this source if asked.
-2. Open RadExpand and choose a language. Then follow the two setup steps: **enable RadExpand in keyboard settings**, then **select RadExpand as the keyboard**.
+1. Open the APK on the device and tap **Install**. Allow installs from this source if asked.
+2. Open RadExpand and choose a language. Then follow the two setup steps:
+   1. enable RadExpand in keyboard settings;
+   2. select RadExpand as the keyboard.
+
    Android shows a "may collect what you type" warning for every keyboard; RadExpand has no internet permission.
 3. When no physical keyboard is connected, a small bar appears on screen so you can switch to your usual keyboard.
 
-**Automatic updates (optional):** the app itself never goes online. To get new versions automatically, add this repository (`https://github.com/Oraddi/radexpand`) to [Obtainium](https://obtainium.imranr.dev/). Updates install over the old version with the same signature, and your shortcuts are kept.
+**Automatic updates (optional):** the app itself never goes online. To get new versions automatically, add this repository (`https://github.com/Oraddi/radexpand`) to [Obtainium](https://obtainium.imranr.dev/).
+Updates install over the old version and your shortcuts are kept.
 
 ### Windows setup
 1. Run the `.msi`. If SmartScreen says "unrecognised app", choose **More info → Run anyway** (the app has no paid code-signing certificate).
 2. RadExpand lives in the system tray. Closing the window keeps it running; right-click the tray icon for Open / Pause / Exit.
-3. **If you use Espanso, close it.** Running both expands shortcuts twice, and RadExpand warns you about it.
-4. **Updates:** one small request goes to GitHub at startup and once a day; nothing you type is ever sent. When a new version exists, **Settings → Updates → Download and install** appears. It never installs without asking, and the check can be turned off.
+3. **If you use another text expander (e.g. Espanso), close it.** Running both expands shortcuts twice; RadExpand detects this and warns you.
+4. **Updates:** one small request goes to GitHub at startup and once a day; nothing you type is ever sent.
+   When a new version exists, **Settings → Updates → Download and install** appears. It never installs without asking, and the check can be turned off in Settings.
+
+### Moving from Espanso
+**Import → Choose file** → your Espanso `.yml` file. On Windows the `%APPDATA%\espanso\match` folder opens automatically.
+The preview shows how many shortcuts will be added, plus any warnings and conflicts. Importing the same file again does not duplicate anything, and the original file is never changed.
 
 ### Limitations
 - Works with a **physical keyboard** only; nothing is expanded while typing on the on-screen keyboard.
-- On Windows, programs running **as administrator** (some RIS/PACS clients) require RadExpand to run as administrator too.
-- Windows cannot generally detect password fields, so turn RadExpand off for your password manager in **Settings → Per-app**. On Android, expansion in password fields is off by default.
-- **Testing status:** tested with automated tests on an Android 15 tablet emulator (including Chrome) and on Windows 11. There is little real-world experience yet on physical Samsung tablets or with Google Docs. Please [report problems](https://github.com/Oraddi/radexpand/issues).
+- On Windows, programs running **as administrator** require RadExpand to run as administrator too.
+- Password fields:
+  - Windows cannot generally detect them, so turn RadExpand off for your password manager in **Settings → Per-app**.
+  - On Android, expansion in password fields is off by default.
+- **Testing status:** tested with automated tests on an Android emulator (including Chrome) and on Windows 11. Real-world use across different devices and apps is still limited.
+  Please [report problems](https://github.com/Oraddi/radexpand/issues).
 
-> **Important:** RadExpand is **not a medical device**. It makes no diagnostic or treatment decisions; it only speeds up typing. Checking the resulting text is the user's responsibility.
+> **Important:** RadExpand is **not a medical device** and makes no decisions of any kind; it only speeds up typing. Checking the resulting text is the user's responsibility.
 
 ---
 
@@ -156,7 +184,7 @@ Requirements: JDK 21 and the Android SDK (`ANDROID_HOME`).
 ./gradlew :desktop:packageMsi           # Windows installer
 ```
 
-Releases are built by GitHub Actions when a `v*` tag is pushed (see `.github/workflows/release.yml`). The APK signing key is stored only in repository secrets.
+Pushing a `v*` tag makes GitHub Actions build the release (see `.github/workflows/release.yml`). The APK signing key is stored only in repository secrets.
 
 ## Lisans / License
 [MIT](LICENSE) © Umitcan Yildiz. Third-party components: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -4,12 +4,12 @@ about: Bir şey beklendiği gibi çalışmıyor / Something does not work as exp
 labels: bug
 ---
 
-**Cihaz / Device:** (ör. Samsung Galaxy Tab S9 + Bluetooth klavye / Windows 11)
+**Cihaz / Device:** (ör. Android 14 + Bluetooth klavye / Windows 11)
 **RadExpand sürümü / version:**
-**Hangi uygulamada / In which app:** (ör. Google Dokümanlar, Samsung Notes, Word)
+**Hangi uygulamada / In which app:** (ör. Chrome, Word, not uygulaması)
 
 **Ne yaptınız / What you did:**
-(ör. `ri` yazıp Space'e bastım / typed `ri` and pressed Space)
+(ör. `rp` yazıp Space'e bastım / typed `rpt` and pressed Space)
 
 **Ne bekliyordunuz / What you expected:**
 

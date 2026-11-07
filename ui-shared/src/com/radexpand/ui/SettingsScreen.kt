@@ -173,11 +173,20 @@ fun SettingsScreen(data: RadExpandData, store: DataStore, platform: PlatformSett
             t("Açıkken \"T2/ri\" içindeki \"ri\" genişlemez.", "When on, a shortcut right after a slash does not expand."),
             s.slashIsWord,
         ) { v -> set { it.copy(slashIsWord = v) } }
-        ChoiceRow(t("Büyük harf", "Capitalization")) {
-            FilterChip(s.caseMode == CaseMode.OFF, { set { it.copy(caseMode = CaseMode.OFF) } }, { Text(t("Kapalı", "Off")) })
-            FilterChip(s.caseMode == CaseMode.CAPITAL, { set { it.copy(caseMode = CaseMode.CAPITAL) } }, { Text(t("Cümle başı (Ri)", "Sentence start (Ri)")) })
-            FilterChip(s.caseMode == CaseMode.FULL, { set { it.copy(caseMode = CaseMode.FULL) } }, { Text(t("Tamamı büyük de (NSİ)", "All caps too (NSI)")) })
+        ChoiceRow(t("Kısayol büyük harfle yazılınca", "When a shortcut is typed with capitals")) {
+            FilterChip(s.caseMode == CaseMode.OFF, { set { it.copy(caseMode = CaseMode.OFF) } }, { Text(t("Genişlemesin", "Don't expand")) })
+            FilterChip(s.caseMode == CaseMode.KEEP_TEXT, { set { it.copy(caseMode = CaseMode.KEEP_TEXT) } }, { Text(t("Metin olduğu gibi", "Text as saved")) })
+            FilterChip(s.caseMode == CaseMode.CAPITAL, { set { it.copy(caseMode = CaseMode.CAPITAL) } }, { Text(t("İlk harf büyük", "First letter capital")) })
+            FilterChip(s.caseMode == CaseMode.FULL, { set { it.copy(caseMode = CaseMode.FULL) } }, { Text(t("İlk harf + tamamı büyük", "First letter + all caps")) })
         }
+        Hint(
+            when (s.caseMode) {
+                CaseMode.OFF -> t("\"Ard\" yazınca genişlemez; yalnızca küçük harfle yazılan kısayol genişler.", "\"Thx\" does not expand; only the lowercase shortcut does.")
+                CaseMode.KEEP_TEXT -> t("\"Ard\" → \"ardından\": metin kaydettiğiniz gibi yazılır.", "\"Thx\" → \"thank you\": the text is typed as you saved it.")
+                CaseMode.CAPITAL -> t("\"Ard\" → \"Ardından\". Tamamı büyük (\"ARD\") genişlemez.", "\"Thx\" → \"Thank you\". All caps (\"THX\") does not expand.")
+                CaseMode.FULL -> t("\"Ard\" → \"Ardından\", \"ARD\" → \"ARDINDAN\".", "\"Thx\" → \"Thank you\", \"THX\" → \"THANK YOU\".")
+            },
+        )
         if (s.caseMode == CaseMode.FULL) {
             ChoiceRow(t("Tamamı büyük için en az harf", "Minimum letters for all caps")) {
                 (2..5).forEach { n -> FilterChip(s.minUpperLetters == n, { set { it.copy(minUpperLetters = n) } }, { Text("$n") }) }
