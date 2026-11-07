@@ -1,5 +1,6 @@
 package com.radexpand.app
 
+import com.radexpand.core.undoCombo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
@@ -48,6 +49,7 @@ class RadExpandIme : InputMethodService() {
     @Volatile private var realIndex: ShortcutIndex = ShortcutIndex(emptyList())
     @Volatile private var realConfig: EngineConfig = EngineConfig()
     @Volatile private var specialCombo: com.radexpand.core.KeyCombo? = null
+    @Volatile private var undoCombo: com.radexpand.core.KeyCombo? = null
     private var testField = false
 
     override fun onCreate() {
@@ -71,6 +73,7 @@ class RadExpandIme : InputMethodService() {
         realIndex = d.buildIndex()
         realConfig = d.settings.toEngineConfig()
         specialCombo = com.radexpand.core.KeyCombo.parse(d.settings.specialKey)
+        undoCombo = d.settings.undoCombo(KeyEvent.KEYCODE_DEL)
         DiagLog.enabled = d.settings.diagnosticsEnabled
         if (!testField) {
             engine.index = realIndex
@@ -131,8 +134,8 @@ class RadExpandIme : InputMethodService() {
             lastDeviceId = event.deviceId
             DiagLog.log("KLAVYE olayı geliyor: ${event.device?.name ?: "bilinmiyor"} (id=${event.deviceId})")
         }
-        val key = KeyMapper.map(event, specialCombo)
-        if (event.repeatCount == 0 && (key == KeyInput.CursorOrEdit || key == KeyInput.Backspace)) {
+        val key = KeyMapper.map(event, specialCombo, undoCombo)
+        if (event.repeatCount == 0 && (key == KeyInput.CursorOrEdit || key == KeyInput.Backspace || key is KeyInput.Undo)) {
             DiagLog.log("TUŞ ${KeyMapper.keyName(keyCode)}")
         }
         val consumed = try {

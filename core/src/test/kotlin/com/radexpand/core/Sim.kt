@@ -68,7 +68,7 @@ open class FakeEditor(
  * tus once motora (IME) gider; tuketilmezse uygulama kendi davranisini uygular;
  * sonra editor imlec degisikligini IME'ye bildirir.
  *
- * Yazim kisaltmalari: ␣ = Space, ⏎ = Enter, ⇥ = Tab, ⌫ = Backspace, ← = sol ok
+ * Yazim kisaltmalari: ␣ = Space, ⏎ = Enter, ⇥ = Tab, ⌫ = Backspace, ⇤ = Shift+Backspace (geri alma), ← = sol ok
  */
 class Sim(
     shortcuts: List<Shortcut>,
@@ -95,6 +95,8 @@ class Sim(
                 '⏎' -> press(KeyInput.Trigger(TriggerKey.ENTER))
                 '⇥' -> press(KeyInput.Trigger(TriggerKey.TAB))
                 '⌫' -> press(KeyInput.Backspace)
+                // Shift+Backspace (varsayilan geri alma tusu)
+                '⇤' -> press(KeyInput.Undo(KeyInput.Backspace))
                 '←' -> press(KeyInput.CursorOrEdit)
                 '★' -> press(KeyInput.Trigger(TriggerKey.SPECIAL))
                 else -> press(KeyInput.Typed(c))
@@ -106,9 +108,9 @@ class Sim(
     fun press(key: KeyInput) {
         val consumed = engine.onKey(key, editor)
         if (!consumed) {
-            when (key) {
-                is KeyInput.Typed -> editor.insert(key.ch.toString())
-                is KeyInput.Trigger -> when (key.key) {
+            when (val k = if (key is KeyInput.Undo) key.fallback else key) {
+                is KeyInput.Typed -> editor.insert(k.ch.toString())
+                is KeyInput.Trigger -> when (k.key) {
                     TriggerKey.SPACE -> editor.insert(" ")
                     TriggerKey.ENTER -> editor.enter()
                     TriggerKey.TAB -> if (editor.tabInsertsTab) editor.insert("\t")
@@ -117,6 +119,7 @@ class Sim(
                 KeyInput.Backspace -> editor.backspace()
                 KeyInput.CursorOrEdit -> if (editor.cursor > 0) editor.cursor-- // sol ok
                 KeyInput.Modifier -> Unit
+                is KeyInput.Undo -> Unit
             }
         }
         if (reportSelectionImmediately) flushSelection()

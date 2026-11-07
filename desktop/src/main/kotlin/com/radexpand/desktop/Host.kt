@@ -1,5 +1,6 @@
 package com.radexpand.desktop
 
+import com.radexpand.core.undoCombo
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -134,6 +135,7 @@ object Host {
     private var baseConfig = EngineConfig()
     private var settings = com.radexpand.core.AppSettings()
     private var specialCombo: KeyCombo? = null
+    private var undoCombo: KeyCombo? = null
     private var pauseCombo: KeyCombo? = null
     private var hook: KeyboardHook? = null
 
@@ -167,9 +169,11 @@ object Host {
     private fun apply(d: RadExpandData) {
         settings = d.settings
         specialCombo = KeyCombo.parse(d.settings.specialKey)
+        undoCombo = d.settings.undoCombo(Vk.BACK)
         pauseCombo = KeyCombo.parse(d.settings.pauseHotkey)
         DesktopDiag.enabled = d.settings.diagnosticsEnabled
-        baseConfig = d.settings.toEngineConfig()
+        // .exe adlari buyuk/kucuk harf farki gozetmeden karsilastirilir
+        baseConfig = d.settings.toEngineConfig().let { c -> c.copy(disabledPackages = c.disabledPackages.map { it.lowercase() }.toSet(), blindPackages = c.blindPackages.map { it.lowercase() }.toSet()) }
         engine.index = d.buildIndex()
         engine.config = effectiveConfig()
     }
@@ -221,7 +225,9 @@ object Host {
         }
         checkForeground()
         if (paused) return false to emptyList()
-        val key = if (WinKeys.isCombo(vk, specialCombo)) com.radexpand.core.KeyInput.Trigger(TriggerKey.SPECIAL) else WinKeys.map(vk, scan)
+        val base = if (WinKeys.isCombo(vk, specialCombo)) com.radexpand.core.KeyInput.Trigger(TriggerKey.SPECIAL) else WinKeys.map(vk, scan)
+        // Geri alma tusu (varsayilan Shift+Backspace): genisletme yoksa normal tus olarak islenir.
+        val key = if (WinKeys.isCombo(vk, undoCombo)) com.radexpand.core.KeyInput.Undo(base) else base
         port.actions.clear()
         val consumed = engine.onKey(key, port)
         if (consumed) swallowedUp += vk
@@ -229,7 +235,8 @@ object Host {
     }
 
     private fun checkForeground() {
-        val (hwnd, exe) = WinProcess.foreground()
+        val (hwnd, exeRaw) = WinProcess.foreground()
+        val exe = exeRaw.lowercase()
         if (hwnd == lastHwnd) {
             val want = effectiveConfig()
             if (engine.config != want) engine.config = want

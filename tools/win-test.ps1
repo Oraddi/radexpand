@@ -86,6 +86,7 @@ public class WinHarness {
             else if (c == '⏎') vk = 0x0D;  // ⏎
             else if (c == '⇥') vk = 0x09;  // ⇥
             else if (c == '⌫') vk = 0x08;  // ⌫
+            else if (c == '⇤') { vk = 0x08; shift = true; }  // Shift+Backspace (geri alma)
             else {
                 int[] m;
                 if (!map.TryGetValue(c, out m)) throw new Exception("Klavye duzeninde yok: " + c);
@@ -169,7 +170,8 @@ $tests = @(
     [pscustomobject]@{ n = 'aç + Space'; s = 'aç␣'; e = 'aç '; b = $false },
     [pscustomobject]@{ n = 'bel + Space'; s = 'bel␣'; e = 'bel '; b = $false },
     [pscustomobject]@{ n = 'bel + Tab'; s = 'bel⇥'; e = 'belirginleşme'; b = $false },
-    [pscustomobject]@{ n = 'ri + Space + Backspace'; s = 'ri␣⌫'; e = 'ri '; b = $false },
+    [pscustomobject]@{ n = 'ri + Space + Shift+Backspace'; s = 'ri␣⇤'; e = 'ri '; b = $false },
+    [pscustomobject]@{ n = 'ri + Space + Backspace'; s = 'ri␣⌫'; e = 'hiperintensite'; b = $false },
     [pscustomobject]@{ n = 'rix + Space'; s = 'rix␣'; e = 'rix '; b = $false },
     [pscustomobject]@{ n = 'Ri + Space'; s = 'Ri␣'; e = 'Hiperintensite '; b = $false },
     [pscustomobject]@{ n = 'kcc + Space + 152'; s = 'kcc␣152'; e = 'Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür.'; b = $false },

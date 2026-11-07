@@ -30,7 +30,7 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 | `rp` + **Tab** + `lar` | `raporlar`: Tab hiçbir şey eklemez, imleç metnin sonunda kalır ve ek yazabilirsiniz |
 | `turp` + Space | `turp␣`: kısayol bir kelimenin parçasıysa **genişlemez** |
 | `Rp` + Space | `Rapor␣` (Ayarlar'dan `rapor␣` olarak bırakmayı da seçebilirsiniz) |
-| genişlemeden hemen sonra **Backspace** | yazdığınız kısayol geri gelir |
+| genişlemeden hemen sonra **Shift + Backspace** | yazdığınız kısayol geri gelir (`rapor` → `rp`); **Backspace** tek başına her zaman normal siler. Geri alma tuşu Ayarlar'dan değiştirilebilir |
 
 - **Tamamen çevrimdışı.** Android uygulamasının internet izni yoktur; yazdıklarınız cihazdan çıkamaz.
 - **Espanso** dosyalarını (`.yml`) önizlemeyle içe aktarır ve Espanso biçiminde dışa aktarır.
@@ -106,7 +106,7 @@ Example: shortcut `rpt` → text `report`
 | `rpt` + **Tab** + `s` | `reports`: Tab adds nothing; the cursor stays right after the text so you can add a suffix |
 | `excerpt` + Space | `excerpt␣`: a shortcut that is part of a word does **not** expand |
 | `Rpt` + Space | `Report␣` (or keep it as `report␣`, set in Settings) |
-| **Backspace** right after an expansion | your abbreviation comes back |
+| **Shift + Backspace** right after an expansion | your abbreviation comes back (`report` → `rpt`); **Backspace** alone always deletes normally. The undo key can be changed in Settings |
 
 - **Fully offline.** The Android app has no internet permission; what you type cannot leave the device.
 - Imports **Espanso** files (`.yml`) with a preview and exports to Espanso format.

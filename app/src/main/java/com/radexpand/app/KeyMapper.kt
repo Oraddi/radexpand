@@ -33,7 +33,13 @@ object KeyMapper {
         return !(plain && m == 0)
     }
 
-    fun map(e: KeyEvent, special: KeyCombo? = null): KeyInput {
+    /** [undo]: kullanicinin geri alma tusu; eslesirse [KeyInput.Undo] (genisletme yoksa normal tus olarak islenir). */
+    fun map(e: KeyEvent, special: KeyCombo? = null, undo: KeyCombo? = null): KeyInput {
+        val base = mapBase(e, special)
+        return if (isCombo(e, undo)) KeyInput.Undo(base) else base
+    }
+
+    private fun mapBase(e: KeyEvent, special: KeyCombo?): KeyInput {
         val code = e.keyCode
         if (isCombo(e, special)) return KeyInput.Trigger(TriggerKey.SPECIAL)
         if (KeyEvent.isModifierKey(code) ||

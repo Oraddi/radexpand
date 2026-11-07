@@ -70,6 +70,8 @@ import com.radexpand.desktop.Files2
 import com.radexpand.desktop.Host
 import com.radexpand.desktop.Updater
 import com.radexpand.ui.ChoiceRow
+import com.radexpand.ui.PerAppSection
+import com.radexpand.core.KnownApps
 import com.radexpand.ui.GuideScreen
 import com.radexpand.ui.Hint
 import com.radexpand.ui.ImportPreviewDialog
@@ -349,13 +351,17 @@ private fun WindowsSettings(data: RadExpandData, onExit: () -> Unit) {
                 }
                 Hint(t("Panodaki önceki metin yapıştırmadan sonra geri konur.", "The previous clipboard text is restored after pasting."))
 
-                SectionTitle(t("Uygulama bazında kapatma", "Per-app"))
-                Hint(t("RadExpand'in çalışmasını istemediğiniz programlar (ör. parola yöneticisi, oyunlar). Son kullandığınız programlar listelenir.", "Programs where RadExpand should not work (e.g. password manager, games). Recently used programs are listed."))
-                val all = (recent + s.disabledPackages).distinct()
-                if (all.isEmpty()) Hint(t("Henüz program yok: başka bir programda biraz yazın.", "No programs yet: type a little in another program."))
-                all.forEach { exe ->
-                    SwitchRow(exe, if (exe in s.disabledPackages) t("RadExpand bu programda KAPALI", "RadExpand is OFF in this program") else "", exe in s.disabledPackages) { on ->
-                        set { it.copy(disabledPackages = if (on) it.disabledPackages + exe else it.disabledPackages - exe) }
+                // Windows'ta .exe adlari kucuk harfle tutulur (WINWORD.EXE = winword.exe).
+                val disabledLower = s.disabledPackages.map { it.lowercase() }.toSet()
+                PerAppSection(
+                    known = KnownApps.windows,
+                    seen = recent.map { it.lowercase() },
+                    disabled = disabledLower,
+                    labelOf = { id -> KnownApps.windows.firstOrNull { it.id == id }?.name ?: id },
+                ) { id, off ->
+                    set { st ->
+                        val cur = st.disabledPackages.map { it.lowercase() }.toSet()
+                        st.copy(disabledPackages = if (off) cur + id else cur - id)
                     }
                 }
 

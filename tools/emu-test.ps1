@@ -37,8 +37,12 @@ function ToTrQ([string]$s) {
     $sb.ToString()
 }
 function Txt($s) { Adb emu event text (ToTrQ $s) | Out-Null; Start-Sleep -Milliseconds 200 }
-$special = @{ 'SPACE' = 'KEYCODE_SPACE'; 'ENTER' = 'KEYCODE_ENTER'; 'TAB' = 'KEYCODE_TAB'; 'BS' = 'KEYCODE_DEL' }
-function Key($k) { Adb shell input keyevent $special[$k] | Out-Null; Start-Sleep -Milliseconds 150 }
+$special = @{ 'SPACE' = 'KEYCODE_SPACE'; 'ENTER' = 'KEYCODE_ENTER'; 'TAB' = 'KEYCODE_TAB'; 'BS' = 'KEYCODE_DEL'; 'SBS' = '' }
+function Key($k) {
+    # SBS = Shift+Backspace (varsayilan geri alma tusu)
+    if ($k -eq 'SBS') { Adb shell input keycombination KEYCODE_SHIFT_LEFT KEYCODE_DEL | Out-Null } else { Adb shell input keyevent $special[$k] | Out-Null }
+    Start-Sleep -Milliseconds 150
+}
 
 $tests = @(
     @{ how = 'ri  (başka tuşa basmayın)';         keys = @('ri');                        exp = 'ri' },
@@ -54,7 +58,8 @@ $tests = @(
     @{ how = 'aç + Space';                        keys = @('aç', 'SPACE');               exp = 'aç ' },
     @{ how = 'bel + Space';                       keys = @('bel', 'SPACE');              exp = 'bel ' },
     @{ how = 'bel + Tab';                         keys = @('bel', 'TAB');                exp = 'belirginleşme' },
-    @{ how = 'ri + Space + Backspace';            keys = @('ri', 'SPACE', 'BS');         exp = 'ri ' },
+    @{ how = 'ri + Space + Shift+Backspace';      keys = @('ri', 'SPACE', 'SBS');        exp = 'ri ' },
+    @{ how = 'ri + Space + Backspace';            keys = @('ri', 'SPACE', 'BS');         exp = 'hiperintensite' },
     @{ how = 'rix + Space';                       keys = @('rix', 'SPACE');              exp = 'rix ' },
     @{ how = 'ri + Enter'; single = $true;        keys = @('ri', 'ENTER');               exp = 'hiperintensite' },
     @{ how = 'olabildiğince hızlı: ri Space ri Space ri Space ri Space ri Space'; keys = @('ri ri ri ri ri', 'SPACE'); exp = ('hiperintensite ' * 5) },
@@ -68,6 +73,12 @@ if (-not $SkipInstall) { Adb install -r $apk | Select-Object -Last 1 }
 Adb shell am force-stop com.radexpand.app | Out-Null
 Adb shell ime enable com.radexpand.app/.RadExpandIme | Out-Null
 Adb shell ime set com.radexpand.app/.RadExpandIme | Out-Null
+# Yeni acilan emulatorde sistem kendi klavyesini geri secebilir: RadExpand secili olana kadar tekrarla.
+for ($i = 0; $i -lt 10; $i++) {
+    if ((Adb shell settings get secure default_input_method) -match 'radexpand') { break }
+    Start-Sleep -Seconds 2
+    Adb shell ime set com.radexpand.app/.RadExpandIme | Out-Null
+}
 Start-Sleep -Seconds 1
 Adb shell am start -n com.radexpand.app/.TestActivity | Out-Null
 Start-Sleep -Seconds 3

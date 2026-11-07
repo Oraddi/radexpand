@@ -1,5 +1,17 @@
 # Değişiklikler / Changelog
 
+## 0.3.2
+
+**Türkçe**
+- **Backspace artık her zaman normal siler.** Genişletmeyi geri almak (kısa hâle dönmek) için ayrı bir tuş kullanılır: varsayılan **Shift + Backspace**. Word, Google Dokümanlar ve tarayıcılarda Shift+Backspace normal silme gibi çalışır; Ctrl+Z ile de çakışmaz. Geri alma tuşu yalnızca genişletmeden hemen sonra iş görür; başka zaman tuş normal işini yapar.
+- Ayarlar → "Genişletmeyi geri alma": Shift + Backspace / özel tuş (ör. F4) / Backspace (eski davranış) / Kapalı.
+- Ayarlar → "Uygulama bazında kapatma": Chrome, Word, Excel, Google Dokümanlar, Gmail, Outlook, WhatsApp, Samsung Notes, parola yöneticileri gibi yaygın uygulamalar hazır listede (Android'de yalnızca yüklü olanlar gösterilir). Windows'ta program adları büyük/küçük harf farkı gözetmeden eşleşir.
+
+**English**
+- **Backspace now always deletes normally.** A separate key undoes an expansion (back to the short form): **Shift + Backspace** by default. In Word, Google Docs and browsers Shift+Backspace works like a normal delete, and it does not clash with Ctrl+Z. The undo key only acts right after an expansion; at any other time it does its normal job.
+- Settings → "Undo an expansion": Shift + Backspace / custom key (e.g. F4) / Backspace (old behaviour) / Off.
+- Settings → "Turn off per app": common apps such as Chrome, Word, Excel, Google Docs, Gmail, Outlook, WhatsApp, Samsung Notes and password managers are listed ready to switch off (on Android only installed ones are shown). On Windows, program names match regardless of letter case.
+
 ## 0.3.1
 
 **Türkçe**

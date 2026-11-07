@@ -111,7 +111,7 @@ class ExpansionEngineTest {
         assertEquals("Ri hiperintensite ", s.text)
     }
 
-    @Test fun `buyuk harfli genisletme geri alinir`() = assertEquals("Ri ", typed("Ri␣⌫"))
+    @Test fun `buyuk harfli genisletme geri alinir`() = assertEquals("Ri ", typed("Ri␣⇤"))
 
     @Test fun `otomatik kisayol buyuk harfle`() = assertEquals("DR. AYŞE ÖZTÜRK", typed("DRİMZA"))
 
@@ -136,7 +136,7 @@ class ExpansionEngineTest {
     @Test fun `noktalama ile genisletme acikken`() {
         val s = sim(config = EngineConfig(punctuationTriggers = true)).type("bir ri, t2r.")
         assertEquals("bir hiperintensite, T2 hiperintens.", s.text)
-        val u = sim(config = EngineConfig(punctuationTriggers = true)).type("ri,⌫")
+        val u = sim(config = EngineConfig(punctuationTriggers = true)).type("ri,⇤")
         assertEquals("ri,", u.text)
         val w = sim(config = EngineConfig(punctuationTriggers = true)).type("biri,")
         assertEquals("biri,", w.text)
@@ -164,7 +164,7 @@ class ExpansionEngineTest {
             override fun onExpansion(packageName: String, trigger: String) { events += "E:$trigger" }
             override fun onUndo(packageName: String, trigger: String) { events += "U:$trigger" }
         }
-        s.type("gizli ri␣⌫")
+        s.type("gizli ri␣⇤")
         assertTrue("E:ri" in events && "U:ri" in events && events.any { it.startsWith("L:test.app:true") }, events.toString())
         assertTrue(events.none { "gizli" in it })
     }
@@ -210,21 +210,47 @@ class ExpansionEngineTest {
 
     // ---------------------------------------------------------------- Geri alma (Backspace)
 
-    @Test fun `Space genisletmesinden hemen sonra Backspace geri alir`() = assertEquals("ri ", typed("ri␣⌫"))
-    @Test fun `Tab genisletmesinden sonra Backspace geri alir`() = assertEquals("ri", typed("ri⇥⌫"))
-    @Test fun `otomatik genisletmeden sonra Backspace geri alir`() = assertEquals("drimza", typed("drimza⌫"))
-    @Test fun `ikinci Backspace normal siler`() = assertEquals("ri", typed("ri␣⌫⌫"))
+    @Test fun `Space genisletmesinden hemen sonra Backspace geri alir`() = assertEquals("ri ", typed("ri␣⇤"))
+    @Test fun `Tab genisletmesinden sonra Backspace geri alir`() = assertEquals("ri", typed("ri⇥⇤"))
+    @Test fun `otomatik genisletmeden sonra Backspace geri alir`() = assertEquals("drimza", typed("drimza⇤"))
+    @Test fun `ikinci Backspace normal siler`() = assertEquals("ri", typed("ri␣⇤⌫"))
     @Test fun `araya tus girerse Backspace normal siler`() = assertEquals("hiperintensite ", typed("ri␣x⌫"))
 
     @Test fun `imlec baska yere tasinirsa geri alma iptal olur`() {
         val s = sim()
         s.type("ri␣")
         s.clickAt(3) // fareyle metnin icine tiklandi
-        s.type("⌫")
+        s.type("⇤")
         assertEquals("hierintensite ", s.text)
     }
 
-    @Test fun `geri alinan kisayol tekrar genisletilebilir`() = assertEquals("hiperintensite", typed("ri␣⌫⌫⇥"))
+    // ---------------------------------------------------------------- Geri alma tusu (0.3.2)
+
+    @Test fun `varsayilan olarak Backspace normal siler`() = assertEquals("hiperintensite", typed("ri␣⌫"))
+
+    @Test fun `Backspace secenegi eski davranisi verir`() =
+        assertEquals("ri ", sim(config = EngineConfig(undoKey = UndoKey.BACKSPACE)).type("ri␣⌫").text)
+
+    @Test fun `geri alma kapaliyken Shift Backspace normal siler`() =
+        assertEquals("hiperintensite", sim(config = EngineConfig(undoKey = UndoKey.OFF)).type("ri␣⇤").text)
+
+    @Test fun `genisletme yokken geri alma tusu normal isini yapar`() = assertEquals("bi", typed("bir⇤"))
+
+    @Test fun `ozel geri alma tusu genisletme yokken uygulamaya gider`() {
+        val s = sim(config = EngineConfig(undoKey = UndoKey.CUSTOM))
+        s.type("ri␣")
+        assertEquals(true, s.engine.onKey(KeyInput.Undo(KeyInput.CursorOrEdit), s.editor))
+        assertEquals("ri ", s.text)
+        assertEquals(false, s.engine.onKey(KeyInput.Undo(KeyInput.CursorOrEdit), s.editor))
+    }
+
+    @Test fun `geri alma tusu birlesimleri`() {
+        assertEquals(KeyCombo(67, KeyCombo.SHIFT), AppSettings().undoCombo(67))
+        assertEquals(null, AppSettings(undoKey = UndoKey.BACKSPACE).undoCombo(8))
+        assertEquals(KeyCombo(115, 0), AppSettings(undoKey = UndoKey.CUSTOM, undoCustomKey = KeyCombo(115, 0).encode()).undoCombo(8))
+    }
+
+    @Test fun `geri alinan kisayol tekrar genisletilebilir`() = assertEquals("hiperintensite", typed("ri␣⇤⌫⇥"))
 
     // ---------------------------------------------------------------- Guvenlik
 
@@ -312,7 +338,7 @@ class ExpansionEngineTest {
         s.type("ri␣bir ri⇥ler t2r␣")
         assertEquals("hiperintensite bir hiperintensiteler T2 hiperintens ", s.text)
         assertEquals(1, slow.icCalls, "yavaş editöre yalnızca bir kez sorulmalı")
-        s.type("ri␣⌫") // geri alma tamponla dogrulanir
+        s.type("ri␣⇤") // geri alma tamponla dogrulanir
         assertEquals("hiperintensite bir hiperintensiteler T2 hiperintens ri ", s.text)
         assertTrue(s.log.any { "yavaş" in it })
     }
@@ -324,7 +350,7 @@ class ExpansionEngineTest {
         s.type("ri␣bir ri⇥ler t2r⏎")
         s.flushSelection()
         assertEquals("hiperintensite bir hiperintensiteler T2 hiperintens\n", s.text)
-        s.type("ri␣⌫")
+        s.type("ri␣⇤")
         s.flushSelection()
         assertEquals("hiperintensite bir hiperintensiteler T2 hiperintens\nri ", s.text)
     }

@@ -71,7 +71,11 @@ data class AppSettings(
     val defaultPropagateCase: Boolean = true,
     val punctuationTriggers: Boolean = false,
     val punctuationChars: String = ".,;:!?",
-    val undoWithBackspace: Boolean = true,
+    /** Genisletmeyi geri alma tusu; Backspace varsayilan olarak normal siler. */
+    val undoKey: UndoKey = UndoKey.SHIFT_BACKSPACE,
+    /** [UndoKey.CUSTOM] icin platformun tus kodu ([KeyCombo.encode]) ve gorunen adi. */
+    val undoCustomKey: String? = null,
+    val undoCustomKeyLabel: String = "",
 
     // ---- gorunum (A5)
     val theme: ThemeMode = ThemeMode.SYSTEM,
@@ -118,7 +122,7 @@ data class AppSettings(
         return EngineConfig(
             enabled = enabled,
             expandInPasswordFields = expandInPasswordFields,
-            undoWithBackspace = undoWithBackspace,
+            undoKey = undoKey,
             allowBlindMode = allowBlindMode,
             keyActions = keyActions,
             manualKeys = keyActions.filterValues { it != KeyAction.OFF }.keys,
@@ -301,4 +305,14 @@ object SyncMerge {
         val merged = byId.values.toList()
         return Result(merged, fromRemote, fromLocal, changed = fromRemote > 0)
     }
+}
+
+/**
+ * Platformun geri alma tusu birlesimi. [backspaceCode]: platformun Backspace tus kodu
+ * (Android KEYCODE_DEL = 67, Windows VK_BACK = 0x08). Backspace modunda null (motor Backspace'i kendisi yorumlar).
+ */
+fun AppSettings.undoCombo(backspaceCode: Int): KeyCombo? = when (undoKey) {
+    UndoKey.SHIFT_BACKSPACE -> KeyCombo(backspaceCode, KeyCombo.SHIFT)
+    UndoKey.CUSTOM -> KeyCombo.parse(undoCustomKey)
+    UndoKey.OFF, UndoKey.BACKSPACE -> null
 }

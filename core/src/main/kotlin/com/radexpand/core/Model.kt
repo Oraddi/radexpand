@@ -40,6 +40,13 @@ data class Shortcut(
 enum class TriggerKey { SPACE, ENTER, TAB, SPECIAL }
 
 /** Fiziksel klavye olayinin, motorun anladigi sade hali. Android'e bagimli degildir. */
+/**
+ * Genisletmeyi geri alma tusu. Varsayilan Shift+Backspace: Backspace normal siler; Word, Google Dokumanlar ve
+ * tarayicilarda Shift+Backspace'in ayri bir gorevi yoktur (Backspace gibi davranir), Ctrl+Z ile de cakismaz.
+ */
+@kotlinx.serialization.Serializable
+enum class UndoKey { OFF, BACKSPACE, SHIFT_BACKSPACE, CUSTOM }
+
 sealed interface KeyInput {
     /** Yazilabilir bir karakter (harf, rakam, noktalama; Turkce karakterler dahil). */
     data class Typed(val ch: Char) : KeyInput
@@ -47,6 +54,12 @@ sealed interface KeyInput {
     data class Trigger(val key: TriggerKey) : KeyInput
 
     data object Backspace : KeyInput
+
+    /**
+     * Kullanicinin "geri al" tusu (ornegin Shift+Backspace). Genisletmeden hemen sonraysa kisayolu geri getirir;
+     * degilse tus [fallback] olarak (normal isiyle) islenir ve uygulamaya gider.
+     */
+    data class Undo(val fallback: KeyInput) : KeyInput
 
     /** Imleci veya metni bilinmeyen bicimde degistirebilen tuslar: oklar, Home/End, Delete, Ctrl+V, Esc ... */
     data object CursorOrEdit : KeyInput
@@ -69,7 +82,7 @@ data class EngineConfig(
     val enabled: Boolean = true,
     val expandInPasswordFields: Boolean = false,
     /** Genisletmeden hemen sonra Backspace: genisletmeyi geri al, yazilan kisayolu geri getir. */
-    val undoWithBackspace: Boolean = true,
+    val undoKey: UndoKey = UndoKey.SHIFT_BACKSPACE,
     /**
      * Editor imlec oncesi metni veremezse (null donerse), yalnizca kendi gordugumuz tuslara
      * dayanarak genislet. Daha riskli oldugu icin sinir sarti daha kati uygulanir.

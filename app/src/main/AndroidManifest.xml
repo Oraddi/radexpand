@@ -5,6 +5,32 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Ayarlar > Uygulama bazinda kapatma: yalnizca yuklu yaygin uygulamalari gostermek icin (izin degildir) -->
+    <queries>
+        <package android:name="com.android.chrome" />
+        <package android:name="com.sec.android.app.sbrowser" />
+        <package android:name="org.mozilla.firefox" />
+        <package android:name="com.microsoft.emmx" />
+        <package android:name="com.google.android.apps.docs.editors.docs" />
+        <package android:name="com.google.android.apps.docs.editors.sheets" />
+        <package android:name="com.google.android.keep" />
+        <package android:name="com.google.android.gm" />
+        <package android:name="com.microsoft.office.word" />
+        <package android:name="com.microsoft.office.excel" />
+        <package android:name="com.microsoft.office.powerpoint" />
+        <package android:name="com.microsoft.office.officehubrow" />
+        <package android:name="com.microsoft.office.outlook" />
+        <package android:name="com.microsoft.office.onenote" />
+        <package android:name="com.microsoft.teams" />
+        <package android:name="com.samsung.android.app.notes" />
+        <package android:name="com.samsung.android.messaging" />
+        <package android:name="com.google.android.apps.messaging" />
+        <package android:name="com.whatsapp" />
+        <package android:name="org.telegram.messenger" />
+        <package android:name="com.x8bit.bitwarden" />
+        <package android:name="com.agilebits.onepassword" />
+    </queries>
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

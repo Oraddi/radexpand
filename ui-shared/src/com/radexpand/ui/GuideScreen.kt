@@ -76,10 +76,10 @@ fun GuideScreen(isWindows: Boolean, onTryIt: () -> Unit, onImportSample: () -> U
             "4",
             t("Kelime sınırı: yanlışlıkla genişlemez", "Word boundary: no accidental expansion"),
             t(
-                "Kısayol ancak ayrı bir kelime olarak yazıldığında genişler. Böylece \"turp\" yazarken sonundaki \"rp\" genişlemez. Kesme işaretinden sonraki ek de korunur (\"Ankara'dan\"). Bir şey yanlışlıkla genişlerse hemen Backspace'e basın: yazdığınız geri gelir.",
-                "A shortcut expands only at the start of a separate word, so typing \"excerpt\" does not expand the \"rpt\" at its end. If something expands by mistake, press Backspace right away: what you typed comes back.",
+                "Kısayol ancak ayrı bir kelime olarak yazıldığında genişler. Böylece \"turp\" yazarken sonundaki \"rp\" genişlemez. Kesme işaretinden sonraki ek de korunur (\"Ankara'dan\"). Bir şey yanlışlıkla genişlerse hemen Shift+Backspace'e basın: yazdığınız geri gelir. Backspace tek başına normal siler; geri alma tuşu Ayarlar'dan değiştirilebilir.",
+                "A shortcut expands only at the start of a separate word, so typing \"excerpt\" does not expand the \"rpt\" at its end. If something expands by mistake, press Shift+Backspace right away: what you typed comes back. Backspace alone deletes normally; the undo key can be changed in Settings.",
             ),
-            listOf(t("turp ␣", "excerpt ␣") to t("turp· (değişmez)", "excerpt· (unchanged)"), t("rp ␣ ⌫", "rpt ␣ ⌫") to t("rp·", "rpt·")),
+            listOf(t("turp ␣", "excerpt ␣") to t("turp· (değişmez)", "excerpt· (unchanged)"), t("rp ␣ ⇧⌫", "rpt ␣ ⇧⌫") to t("rp·", "rpt·")),
         )
         GuideCard(
             "5",

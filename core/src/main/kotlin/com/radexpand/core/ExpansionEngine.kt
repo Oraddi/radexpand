@@ -114,6 +114,7 @@ class ExpansionEngine(
             is KeyInput.Typed -> onTyped(key.ch, f, port)
             is KeyInput.Trigger -> onTrigger(key.key, f, port)
             KeyInput.Backspace -> onBackspace(f, port)
+            is KeyInput.Undo -> if (config.undoKey != UndoKey.OFF && tryUndo(f, port)) true else onKey(key.fallback, port)
             KeyInput.CursorOrEdit -> {
                 resetBuffer(anchor = false)
                 last = null
@@ -223,26 +224,30 @@ class ExpansionEngine(
         return true
     }
 
-    private fun onBackspace(f: FieldInfo, port: EditorPort): Boolean {
-        val l = last
-        last = null
-        if (l != null && config.undoWithBackspace && !hasSelection) {
-            val t = if (editorSlow) null else port.textBeforeCursor(l.inserted.length)
-            // Editor metin veremiyorsa tampona bak (imlec oynasaydi 'last' zaten silinmis olurdu).
-            val same = if (t != null) t.toString() == l.inserted else buf.endsWith(l.inserted)
-            if (same) {
-                if (port.replaceBeforeCursor(l.inserted.length, l.restore)) {
-                    bufferReplace(l.inserted.length, l.restore)
-                    addMove(-l.inserted.length)
-                    addMove(l.restore.length)
-                    observer.onUndo(f.packageName, l.trigger)
-                    diag.log("GERİ AL '${l.trigger}'")
-                    return true
-                }
-            } else {
-                diag.log("GERİ AL yapılamadı: metin değişmiş ya da okunamadı")
-            }
+    /** Son genisletmeyi geri al (yalnizca genisletmeden hemen sonra). Basarisizsa false; tus normal islenir. */
+    private fun tryUndo(f: FieldInfo, port: EditorPort): Boolean {
+        val l = last ?: return false
+        if (hasSelection) return false
+        val t = if (editorSlow) null else port.textBeforeCursor(l.inserted.length)
+        // Editor metin veremiyorsa tampona bak (imlec oynasaydi 'last' zaten silinmis olurdu).
+        val same = if (t != null) t.toString() == l.inserted else buf.endsWith(l.inserted)
+        if (!same) {
+            diag.log("GERİ AL yapılamadı: metin değişmiş ya da okunamadı")
+            return false
         }
+        if (!port.replaceBeforeCursor(l.inserted.length, l.restore)) return false
+        last = null
+        bufferReplace(l.inserted.length, l.restore)
+        addMove(-l.inserted.length)
+        addMove(l.restore.length)
+        observer.onUndo(f.packageName, l.trigger)
+        diag.log("GERİ AL '${l.trigger}'")
+        return true
+    }
+
+    private fun onBackspace(f: FieldInfo, port: EditorPort): Boolean {
+        if (config.undoKey == UndoKey.BACKSPACE && tryUndo(f, port)) return true
+        last = null
         if (buf.isNotEmpty()) {
             buf.setLength(buf.length - 1)
             addMove(-1)

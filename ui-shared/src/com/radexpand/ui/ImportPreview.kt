@@ -80,7 +80,7 @@ fun ImportPreviewDialog(reports: List<EspansoReport>, data: RadExpandData, store
                     }
                     val autos = all.count { it.mode == com.radexpand.core.ExpandMode.AUTO && it.note.contains("word") }
                     if (autos > 0) {
-                        Hint(t("$autos kısayol Espanso'da \"word\" olmadan tanımlıydı: RadExpand'de otomatik olarak aktarılır. Bu kısayolla BAŞLAYAN bir kelime yazarsanız (ör. \"kat\" kısayolu \"katı\" yazarken) genişler; hemen Backspace ile geri alabilirsiniz. Bu davranış Ayarlar → İçe aktarma'dan değiştirilebilir.", "$autos shortcuts had no \"word\" in Espanso: they are imported as automatic. If you type a word that STARTS with such a shortcut, it expands; press Backspace right away to undo. This can be changed in Settings → Import."))
+                        Hint(t("$autos kısayol Espanso'da \"word\" olmadan tanımlıydı: RadExpand'de otomatik olarak aktarılır. Bu kısayolla BAŞLAYAN bir kelime yazarsanız (ör. \"kat\" kısayolu \"katı\" yazarken) genişler; hemen geri alma tuşuyla (varsayılan Shift+Backspace) geri alabilirsiniz. Bu davranış Ayarlar → İçe aktarma'dan değiştirilebilir.", "$autos shortcuts had no \"word\" in Espanso: they are imported as automatic. If you type a word that STARTS with such a shortcut, it expands; press the undo key (Shift+Backspace by default) right away. This can be changed in Settings → Import."))
                     }
                 }
                 Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

@@ -233,7 +233,7 @@ class DataAndEspansoTest {
         assertEquals("CC ve MLO, Kortikal atrofi ile uyumlu görünüm mevcuttur.", sim2.text)
         // Bilinen ve kabul edilen davranis: otomatik kisayolla BASLAYAN bir kelime yazilirken kisayol genisler.
         val sim3 = Sim(shortcuts)
-        sim3.type("kat⌫ı")
+        sim3.type("kat⇤ı")
         assertEquals("katı", sim3.text)
     }
 

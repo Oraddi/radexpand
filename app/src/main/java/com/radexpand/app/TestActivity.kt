@@ -58,13 +58,14 @@ class TestActivity : Activity(), InputManager.InputDeviceListener {
         TestCase("11. Kelime sonundaki aynı harf", "aç + Space", "aç "),
         TestCase("12. Yalnızca-Tab kısayolu, Space ile", "bel + Space", "bel "),
         TestCase("13. Yalnızca-Tab kısayolu, Tab ile", "bel + Tab", "belirginleşme"),
-        TestCase("14. Geri alma", "ri + Space + Backspace", "ri "),
+        TestCase("14. Geri alma", "ri + Space + Shift+Backspace", "ri "),
         TestCase("15. Kısayol + harf", "rix + Space", "rix "),
         TestCase("16. Tek satırlı alanda Enter", "ri + Enter", "hiperintensite", singleLine = true),
         TestCase("17. Hızlı yazım", "olabildiğince hızlı: ri Space ri Space ri Space ri Space ri Space", "hiperintensite ".repeat(5)),
         TestCase("18. Çok satırlı genişletme", "rtü + Space", "Raporda tanımlı bulgular\n\nDr. Ayşe ÖZTÜRK "),
         TestCase("19. Cümle başında büyük harf", "Ri + Space", "Hiperintensite "),
         TestCase("20. İmleç işareti (şablon)", "kcc + Space + 152", "Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür."),
+        TestCase("21. Backspace normal siler", "ri + Space + Backspace", "hiperintensite"),
     )
 
     private val rows = ArrayList<Row>()

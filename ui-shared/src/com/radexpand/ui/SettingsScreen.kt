@@ -45,6 +45,7 @@ import com.radexpand.core.KeyAction
 import com.radexpand.core.NoWordImport
 import com.radexpand.core.RadExpandData
 import com.radexpand.core.ThemeMode
+import com.radexpand.core.UndoKey
 
 /** Platforma ozgu parcalar (Android / Windows). */
 class PlatformSettings(
@@ -209,11 +210,7 @@ fun SettingsScreen(data: RadExpandData, store: DataStore, platform: PlatformSett
                 label = { Text(t("Hangi işaretler", "Which marks")) }, singleLine = true, modifier = Modifier.widthIn(max = 300.dp),
             )
         }
-        SwitchRow(
-            t("Backspace ile geri al", "Undo with Backspace"),
-            t("Genişletmeden hemen sonra Backspace: yazdığınız kısayol geri gelir.", "Backspace right after an expansion brings back what you typed."),
-            s.undoWithBackspace,
-        ) { v -> set { it.copy(undoWithBackspace = v) } }
+        UndoKeyCard(s, platform, onCapture = { capturing = it }) { f -> set(f) }
 
         // ------------------------------------------------------------ ice aktarma, yedek, senkron
         SectionTitle(t("İçe aktarma, yedek ve senkron", "Import, backup and sync"))
@@ -311,5 +308,52 @@ private fun KeyRow(key: String, ownAction: String, value: KeyAction, onChange: (
         FilterChip(value == KeyAction.OFF, { onChange(KeyAction.OFF) }, { Text(t("Kapalı", "Off")) })
         FilterChip(value == KeyAction.EXPAND_WITH_KEY, { onChange(KeyAction.EXPAND_WITH_KEY) }, { Text(t("Genişlet + ", "Expand + ") + ownAction) })
         FilterChip(value == KeyAction.EXPAND_ONLY, { onChange(KeyAction.EXPAND_ONLY) }, { Text(t("Yalnızca genişlet", "Expand only")) })
+    }
+}
+
+/** Genisletmeyi geri alma tusu secimi. Backspace varsayilan olarak normal siler. */
+@Composable
+private fun UndoKeyCard(s: AppSettings, platform: PlatformSettings, onCapture: (String?) -> Unit, set: ((AppSettings) -> AppSettings) -> Unit) {
+    Card(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(t("Genişletmeyi geri alma", "Undo an expansion"), fontWeight = FontWeight.Bold)
+            Hint(
+                t(
+                    "Genişletmeden hemen sonra bu tuşa basarsanız yazdığınız kısa hâl geri gelir (rapor → rp). Başka bir zaman basarsanız tuş normal işini yapar. Backspace her zaman normal siler (\"Backspace\" seçeneği hariç).",
+                    "Press this key right after an expansion to get back what you typed (report → rpt). At any other time the key does its normal job. Backspace always deletes normally (except with the \"Backspace\" option).",
+                ),
+            )
+            ChoiceRow(t("Geri alma tuşu", "Undo key")) {
+                FilterChip(s.undoKey == UndoKey.SHIFT_BACKSPACE, { set { it.copy(undoKey = UndoKey.SHIFT_BACKSPACE) } }, { Text("Shift + Backspace") })
+                FilterChip(s.undoKey == UndoKey.CUSTOM, {
+                    if (s.undoCustomKey != null) set { it.copy(undoKey = UndoKey.CUSTOM) } else {
+                        onCapture("undo")
+                        platform.startKeyCapture { code, label ->
+                            onCapture(null)
+                            if (code != null) set { it.copy(undoKey = UndoKey.CUSTOM, undoCustomKey = code, undoCustomKeyLabel = label) }
+                        }
+                    }
+                }, { Text(if (s.undoCustomKey != null) t("Özel: ", "Custom: ") + s.undoCustomKeyLabel else t("Özel tuş…", "Custom key…")) })
+                FilterChip(s.undoKey == UndoKey.BACKSPACE, { set { it.copy(undoKey = UndoKey.BACKSPACE) } }, { Text("Backspace") })
+                FilterChip(s.undoKey == UndoKey.OFF, { set { it.copy(undoKey = UndoKey.OFF) } }, { Text(t("Kapalı", "Off")) })
+            }
+            if (s.undoKey == UndoKey.CUSTOM) {
+                TextButton(onClick = {
+                    onCapture("undo")
+                    platform.startKeyCapture { code, label ->
+                        onCapture(null)
+                        if (code != null) set { it.copy(undoKey = UndoKey.CUSTOM, undoCustomKey = code, undoCustomKeyLabel = label) }
+                    }
+                }) { Text(t("Başka tuş ata", "Assign another key")) }
+            }
+            Hint(
+                when (s.undoKey) {
+                    UndoKey.SHIFT_BACKSPACE -> t("Önerilen. Word, Google Dokümanlar ve tarayıcılarda Shift+Backspace normal silme gibi çalışır; Ctrl+Z (programın kendi geri alması) ile de çakışmaz.", "Recommended. In Word, Google Docs and browsers Shift+Backspace works like a normal delete, and it does not clash with Ctrl+Z (the program's own undo).")
+                    UndoKey.CUSTOM -> t("Programların kendi kısayollarıyla çakışmayan bir tuş seçin (ör. F4). Ctrl+Z gibi tuşları seçmeyin.", "Choose a key that programs do not use themselves (e.g. F4). Avoid keys like Ctrl+Z.")
+                    UndoKey.BACKSPACE -> t("Genişletmeden hemen sonraki ilk Backspace silmez, kısayolu geri getirir.", "The first Backspace right after an expansion does not delete; it brings the shortcut back.")
+                    UndoKey.OFF -> t("Geri alma yok. Yanlış genişlemeyi elle silmeniz gerekir.", "No undo. You have to delete a wrong expansion yourself.")
+                },
+            )
+        }
     }
 }

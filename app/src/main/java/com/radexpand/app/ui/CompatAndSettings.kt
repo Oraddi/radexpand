@@ -2,6 +2,8 @@
 
 package com.radexpand.app.ui
 
+import com.radexpand.ui.PerAppSection
+import com.radexpand.core.KnownApps
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -84,6 +86,21 @@ fun AndroidSettings(data: RadExpandData) {
             cancelKeyCapture = { KeyCapture.pending = null },
             top = { KeyboardSetupCard(alwaysShow = true) },
             bottom = {
+                val stats by CompatStats.stats.collectAsState()
+                // Yalnizca yuklu yaygin uygulamalar (manifest'teki <queries> sayesinde gorunur); internet gerekmez.
+                val installed = remember {
+                    KnownApps.android.filter { app ->
+                        runCatching { ctx.packageManager.getApplicationInfo(app.id, 0) }.isSuccess
+                    }
+                }
+                PerAppSection(
+                    known = installed,
+                    seen = stats.entries.sortedByDescending { it.value.lastUsed }.map { it.key },
+                    disabled = data.settings.disabledPackages,
+                    labelOf = { CompatStats.label(it) },
+                ) { id, off ->
+                    setSettings { it.copy(disabledPackages = if (off) it.disabledPackages + id else it.disabledPackages - id) }
+                }
                 SectionTitle(t("Fiziksel klavye çıkınca", "When the physical keyboard is disconnected"))
                 ChoiceRow("") {
                     FilterChip(data.settings.onKeyboardDisconnect == DisconnectAction.SHOW_BAR, { setSettings { it.copy(onKeyboardDisconnect = DisconnectAction.SHOW_BAR) } }, { Text(t("Alt şeridi göster", "Show the bottom bar")) })

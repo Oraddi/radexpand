@@ -29,7 +29,7 @@ class SettingsBehaviorTest {
         assertEquals("turp ", run(s, "turp␣", tr))
         assertEquals("Rapor ", run(s, "Rp␣", tr))
         assertEquals("rapor ", run(AppSettings(caseMode = CaseMode.KEEP_TEXT), "Rp␣", tr))
-        assertEquals("rp ", run(s, "rp␣⌫", tr))
+        assertEquals("rp ", run(s, "rp␣⇤", tr))
 
         val en = listOf(Shortcut("rpt", "report"))
         assertEquals("report ", run(s, "rpt␣", en))
