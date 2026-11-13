@@ -76,6 +76,20 @@ fun main(args: Array<String>) {
         val icon = rememberVectorPainter(AppIcon)
         val data by DesktopStore.data.collectAsState()
         fun quit() {
+            // Drive'a elle tasima kullaniliyorsa ve gonderilmemis degisiklik varsa hatirlat.
+            if (DriveShare.isPending(DesktopStore.data.value, DesktopStore.prefs.value)) {
+                val answer = JOptionPane.showConfirmDialog(
+                    null,
+                    tx(
+                        "Bu bilgisayardaki kısayol değişiklikleri henüz Drive'a gönderilmedi.\nŞimdi gönderilsin mi? (Dosya İndirilenler'e kaydedilir ve Drive tarayıcıda açılır.)",
+                        "Shortcut changes on this computer have not been sent to Drive yet.\nSend them now? (The file is saved to Downloads and Drive opens in the browser.)",
+                    ),
+                    "RadExpand",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                )
+                if (answer == JOptionPane.CANCEL_OPTION || answer == JOptionPane.CLOSED_OPTION) return
+                if (answer == JOptionPane.YES_OPTION) runCatching { DriveShare.send() }
+            }
             Host.stop()
             exitApplication()
         }

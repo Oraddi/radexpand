@@ -143,6 +143,15 @@ fun DesktopRoot(onHide: () -> Unit, onExit: () -> Unit) {
                 espanso?.let { other -> Banner(t("$other da çalışıyor", "$other is also running"), t("İkisi aynı anda çalışırsa kısayollar iki kez genişler ve metin karışır. $other programını kapatın (tepsi simgesi → Çıkış/Exit) ve Windows ile başlamasını kapatın.", "If both run at the same time, shortcuts expand twice and the text gets mixed up. Close $other (tray icon → Exit) and stop it from starting with Windows.")) }
                 if (!Host.hookActive) Banner(t("Klavye dinlenemiyor", "Cannot listen to the keyboard"), t("Windows klavye kancasını kuramadı. RadExpand'i yeniden başlatın.", "Windows could not install the keyboard hook. Restart RadExpand."))
                 if (Host.paused) Banner(t("RadExpand duraklatıldı", "RadExpand is paused"), t("Tepsi simgesine sağ tıklayıp \"Devam et\" seçin.", "Right-click the tray icon and choose \"Resume\"."))
+                val prefs by DesktopStore.prefs.collectAsState()
+                if (com.radexpand.desktop.DriveShare.isPending(data, prefs)) {
+                    Card(Modifier.fillMaxWidth().padding(12.dp)) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(t("Bu bilgisayardaki değişiklikler henüz Drive'a gönderilmedi.", "Changes on this computer have not been sent to Drive yet."), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                            TextButton(onClick = { sendToDrive { m -> scope.launch { snackbar.showSnackbar(m) } } }) { Text(t("Drive'a gönder", "Send to Drive")) }
+                        }
+                    }
+                }
                 if (upd.updateAvailable) {
                     Card(Modifier.fillMaxWidth().padding(12.dp)) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -213,6 +222,8 @@ private fun TransferScreen(data: RadExpandData, snackbar: SnackbarHostState, pic
     }
 
     Column(Modifier.fillMaxSize().padding(horizontal = 24.dp).verticalScroll(rememberScrollState())) {
+        DriveShareCard(data) { say(it) }
+
         SectionTitle(t("Espanso'dan ya da yedekten içe aktar", "Import from Espanso or a backup"))
         Hint(t("base.yml gibi Espanso dosyalarını ya da RadExpand yedeğini (.json) seçin (Espanso klasörü açılır). Önce önizleme gösterilir; orijinal dosya değiştirilmez.", "Choose Espanso files such as base.yml or a RadExpand backup (.json) (the Espanso folder opens). You see a preview first; the original file is not changed."))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
@@ -220,7 +231,7 @@ private fun TransferScreen(data: RadExpandData, snackbar: SnackbarHostState, pic
             OutlinedButton(onClick = { val n = importSamplePack(DesktopStore); say(t("Örnek paketten $n kısayol eklendi.", "$n shortcuts added from the sample pack.")) }) { Text(t("Örnek radyoloji paketi", "Sample radiology pack")) }
         }
 
-        SectionTitle(t("Tablet ile senkron", "Sync with the tablet"))
+        SectionTitle(t("Otomatik senkron dosyası (Drive masaüstü programı kuruluysa)", "Automatic sync file (if Google Drive for desktop is installed)"))
         Hint(
             t(
                 "Tablet ve bu bilgisayar aynı dosyayı kullanır (ör. Google Drive klasöründe radexpand-sync.json). Dosya 5 saniyede bir kontrol edilir; buradaki değişiklikler 2 saniye sonra yazılır. Aynı kısayol iki yerde değiştiyse son değişiklik kazanır; silmeler de taşınır.",

@@ -35,7 +35,7 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 - **Tamamen çevrimdışı.** Android uygulamasının internet izni yoktur; yazdıklarınız cihazdan çıkamaz.
 - **Kısayol arama paneli (Alt + Space):** kayıtlı kısayollar listelenir; yazarak arayın, Enter ile yazdırın (Espanso'daki gibi).
 - **Espanso** dosyalarını (`.yml`) önizlemeyle içe aktarır ve Espanso biçiminde dışa aktarır.
-- **Android ↔ Windows senkronu** ortak bir dosya üzerinden yapılır (ör. Google Drive klasörü). Son değişiklik kazanır, silmeler de taşınır.
+- **Cihazlar arası taşıma:** Drive masaüstü programı varsa ortak bir dosya üzerinden otomatik; yoksa "Drive'a gönder / Drive'dan al" ile iki tıkla elle. Son değişiklik kazanır, silmeler de taşınır.
 - **Şablonlar:** `$|$` imlecin duracağı yeri gösterir. Birden fazla `$|$` varsa Tab ile sonrakine geçilir. `{tarih}` ve `{saat}` değişkenleri de kullanılabilir.
   Örnek: `Toplantı $|$ tarihinde, $|$ salonunda yapılacaktır.`
 - **Her şey Ayarlar'dan değiştirilebilir:**
@@ -75,6 +75,13 @@ Güncellemeler eski sürümün üzerine kurulur ve kısayollarınız kalır.
 4. **Güncelleme:** Açılışta ve günde bir kez GitHub'a tek bir küçük istek gönderilir; yazdığınız hiçbir şey gönderilmez.
    Yeni sürüm varsa **Ayarlar → Güncelleme → İndir ve kur** çıkar. Sormadan kurmaz ve kontrol ayarlardan kapatılabilir.
 
+### Bilgisayarlar arasında taşıma (Google Drive, elle)
+Birden çok bilgisayar kullanıyorsanız ve Drive masaüstü programı kurulamıyorsa:
+1. Kısayol değiştirdiğiniz bilgisayarda **Aktar → Drive'a gönder**: dosya İndirilenler'e kaydedilir, seçili gösterilir ve tarayıcıda Drive açılır. Dosyayı Drive'daki kendi `RadExpand` klasörünüze sürükleyin (aynı ad varsa "Mevcut dosyayı değiştir").
+2. Başka bilgisayarda dosyayı Drive'dan indirin ve **Aktar → Drive'dan al** deyin.
+
+Kısayollar birleştirilir: aynı kısayolda daha yeni olan kalır, silmeler de taşınır, hiçbir şey çoğalmaz. Gönderilmemiş değişiklik varsa RadExpand üstte uyarır ve kapanırken sorar. RadExpand'in kendisi internete bağlanmaz.
+
 ### Espanso'dan geçiş
 **Aktar → Dosya seç** → Espanso `.yml` dosyanız. Windows'ta `%APPDATA%\espanso\match` klasörü kendiliğinden açılır.
 Önizlemede kaç kısayolun geleceğini, uyarıları ve çakışmaları görürsünüz. Aynı dosyayı tekrar aktarmak kayıtları çoğaltmaz; orijinal dosya da değişmez.
@@ -112,7 +119,7 @@ Example: shortcut `rpt` → text `report`
 - **Fully offline.** The Android app has no internet permission; what you type cannot leave the device.
 - **Shortcut search panel (Alt + Space):** lists your saved shortcuts; type to search, Enter to insert (like Espanso).
 - Imports **Espanso** files (`.yml`) with a preview and exports to Espanso format.
-- **Android ↔ Windows sync** through a shared file (e.g. a Google Drive folder). The latest change wins; deletions are synced too.
+- **Moving between devices:** automatic through a shared file if the Drive desktop program is installed; otherwise by hand in two clicks with "Send to Drive / Get from Drive". The latest change wins; deletions are synced too.
 - **Templates:** `$|$` marks where the cursor stops. With several `$|$` marks, Tab jumps to the next one. You can also use `{date}` and `{time}` variables.
   Example: `The meeting will be held on $|$ in room $|$.`
 - **Everything is configurable in Settings:**
@@ -150,6 +157,13 @@ Updates install over the old version and your shortcuts are kept.
 3. **If you use another text expander (e.g. Espanso), close it.** Running both expands shortcuts twice; RadExpand detects this and warns you.
 4. **Updates:** one small request goes to GitHub at startup and once a day; nothing you type is ever sent.
    When a new version exists, **Settings → Updates → Download and install** appears. It never installs without asking, and the check can be turned off in Settings.
+
+### Moving between computers (Google Drive, by hand)
+If you use several computers and cannot install the Drive desktop program:
+1. On the computer where you changed shortcuts, press **Import → Send to Drive**: the file is saved to Downloads, shown selected, and Drive opens in the browser. Drag the file into your own `RadExpand` folder in Drive (if the name exists, choose "Replace existing file").
+2. On another computer, download the file from Drive and press **Import → Get from Drive**.
+
+Shortcuts are merged: for the same shortcut the newer one wins, deletions are carried over, nothing is duplicated. If there are unsent changes, RadExpand shows a warning and asks when you exit. RadExpand itself does not connect to the internet.
 
 ### Moving from Espanso
 **Import → Choose file** → your Espanso `.yml` file. On Windows the `%APPDATA%\espanso\match` folder opens automatically.

@@ -28,7 +28,13 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+    useJUnitPlatform()
+    // Testler gercek %APPDATA%\RadExpand verisine dokunmasin
+    val home = layout.buildDirectory.dir("test-home").get().asFile
+    environment("RADEXPAND_HOME", home.absolutePath)
+    doFirst { home.deleteRecursively() }
+}
 
 val appVersion = project.property("radexpandVersion") as String
 

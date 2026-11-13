@@ -19,6 +19,10 @@ import java.util.Locale
 data class DesktopPrefs(
     val syncPath: String? = null,
     val startWithWindows: Boolean = false,
+    /** "Drive'a gonder / Drive'dan al" bu bilgisayarda en az bir kez kullanildi mi (hatirlatma yalnizca o zaman). */
+    val manualSyncUsed: Boolean = false,
+    /** Son gonderilen / alinan kisayol listesinin parmak izi ([DriveShare.stamp]). */
+    val lastSharedStamp: String? = null,
 )
 
 /**

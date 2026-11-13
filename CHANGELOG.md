@@ -1,5 +1,15 @@
 # Değişiklikler / Changelog
 
+## 0.4.1
+
+**Türkçe**
+- Windows: **"Drive'a gönder" / "Drive'dan al"**, Drive masaüstü programı kurulamayan bilgisayarlar için elle taşıma. Kısayollar İndirilenler'e sabit adla kaydedilir, dosya seçili gösterilir ve tarayıcıda Drive açılır; diğer bilgisayarda indirilen dosya tek tıkla birleştirilir. RadExpand internete bağlanmaz.
+- Gönderilmemiş değişiklik varsa ana pencerenin üstünde uyarı ve çıkışta "Şimdi gönderilsin mi?" sorusu.
+
+**English**
+- Windows: **"Send to Drive" / "Get from Drive"**, moving shortcuts by hand for computers where the Drive desktop program cannot be installed. Shortcuts are saved to Downloads under a fixed name, the file is shown selected and Drive opens in the browser; on the other computer the downloaded file is merged in one click. RadExpand does not connect to the internet.
+- A warning at the top of the main window and an "Send now?" question on exit when there are unsent changes.
+
 ## 0.4.0
 
 **Türkçe**
