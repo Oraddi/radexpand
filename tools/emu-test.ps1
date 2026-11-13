@@ -37,10 +37,12 @@ function ToTrQ([string]$s) {
     $sb.ToString()
 }
 function Txt($s) { Adb emu event text (ToTrQ $s) | Out-Null; Start-Sleep -Milliseconds 200 }
-$special = @{ 'SPACE' = 'KEYCODE_SPACE'; 'ENTER' = 'KEYCODE_ENTER'; 'TAB' = 'KEYCODE_TAB'; 'BS' = 'KEYCODE_DEL'; 'SBS' = '' }
+$special = @{ 'SPACE' = 'KEYCODE_SPACE'; 'ENTER' = 'KEYCODE_ENTER'; 'TAB' = 'KEYCODE_TAB'; 'BS' = 'KEYCODE_DEL'; 'SBS' = ''; 'ASP' = '' }
 function Key($k) {
     # SBS = Shift+Backspace (varsayilan geri alma tusu)
-    if ($k -eq 'SBS') { Adb shell input keycombination KEYCODE_SHIFT_LEFT KEYCODE_DEL | Out-Null } else { Adb shell input keyevent $special[$k] | Out-Null }
+    if ($k -eq 'SBS') { Adb shell input keycombination KEYCODE_SHIFT_LEFT KEYCODE_DEL | Out-Null }
+    elseif ($k -eq 'ASP') { Adb shell input keycombination KEYCODE_ALT_LEFT KEYCODE_SPACE | Out-Null; Start-Sleep -Milliseconds 500 }
+    else { Adb shell input keyevent $special[$k] | Out-Null }
     Start-Sleep -Milliseconds 150
 }
 
@@ -65,6 +67,7 @@ $tests = @(
     @{ how = 'olabildiğince hızlı: ri Space ri Space ri Space ri Space ri Space'; keys = @('ri ri ri ri ri', 'SPACE'); exp = ('hiperintensite ' * 5) },
     @{ how = 'rtü + Space';                       keys = @('rtü', 'SPACE');              exp = "Raporda tanımlı bulgular`n`nDr. Ayşe ÖZTÜRK " },
     @{ how = 'Ri + Space';                        keys = @('Ri', 'SPACE');               exp = 'Hiperintensite ' },
+    @{ how = 'Alt+Space, kcc, Enter, 152';        keys = @('ASP', 'kcc', 'ENTER', '152'); exp = 'Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür.' },
     @{ how = 'kcc + Space + 152';                 keys = @('kcc', 'SPACE', '152');       exp = 'Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür.' }
 )
 

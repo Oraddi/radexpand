@@ -90,6 +90,9 @@ fun main(args: Array<String>) {
                 Item(t("Çıkış", "Exit"), onClick = { quit() })
             },
         )
+        // Kisayol arama paneli (Alt+Space)
+        val search by Host.search.collectAsState()
+        search?.let { req -> androidx.compose.runtime.key(req) { com.radexpand.desktop.ui.SearchWindow(req, data.settings) } }
         Window(
             onCloseRequest = { visible = false }, // kapatinca tepside calismaya devam eder
             visible = visible,

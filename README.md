@@ -33,6 +33,7 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 | genişlemeden hemen sonra **Shift + Backspace** | yazdığınız kısayol geri gelir (`rapor` → `rp`); **Backspace** tek başına her zaman normal siler. Geri alma tuşu Ayarlar'dan değiştirilebilir |
 
 - **Tamamen çevrimdışı.** Android uygulamasının internet izni yoktur; yazdıklarınız cihazdan çıkamaz.
+- **Kısayol arama paneli (Alt + Space):** kayıtlı kısayollar listelenir; yazarak arayın, Enter ile yazdırın (Espanso'daki gibi).
 - **Espanso** dosyalarını (`.yml`) önizlemeyle içe aktarır ve Espanso biçiminde dışa aktarır.
 - **Android ↔ Windows senkronu** ortak bir dosya üzerinden yapılır (ör. Google Drive klasörü). Son değişiklik kazanır, silmeler de taşınır.
 - **Şablonlar:** `$|$` imlecin duracağı yeri gösterir. Birden fazla `$|$` varsa Tab ile sonrakine geçilir. `{tarih}` ve `{saat}` değişkenleri de kullanılabilir.
@@ -62,7 +63,7 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 
    Android her klavye için "yazdıklarınızı toplayabilir" uyarısı gösterir; RadExpand'in internet izni yoktur.
 3. Türkçe karakterler yanlış çıkarsa: **Ayarlar → Fiziksel klavye düzeni → Türkçe Q**.
-4. Fiziksel klavye bağlı değilken ekranda küçük bir çubuk görünür; oradan normal klavyenize geçebilirsiniz.
+4. Fiziksel klavyeyi çıkarınca RadExpand kendiliğinden ekran klavyesine (Samsung Klavye ya da Gboard) geçer. Klavyeyi geri takınca Android otomatik dönmez: alt çubuktaki klavye simgesine dokunup RadExpand'i seçin.
 
 **Otomatik güncelleme (isteğe bağlı):** Uygulamanın kendisi internete çıkmaz. Yeni sürümleri otomatik almak için [Obtainium](https://obtainium.imranr.dev/) uygulamasına bu sayfanın adresini (`https://github.com/Oraddi/radexpand`) ekleyin.
 Güncellemeler eski sürümün üzerine kurulur ve kısayollarınız kalır.
@@ -109,6 +110,7 @@ Example: shortcut `rpt` → text `report`
 | **Shift + Backspace** right after an expansion | your abbreviation comes back (`report` → `rpt`); **Backspace** alone always deletes normally. The undo key can be changed in Settings |
 
 - **Fully offline.** The Android app has no internet permission; what you type cannot leave the device.
+- **Shortcut search panel (Alt + Space):** lists your saved shortcuts; type to search, Enter to insert (like Espanso).
 - Imports **Espanso** files (`.yml`) with a preview and exports to Espanso format.
 - **Android ↔ Windows sync** through a shared file (e.g. a Google Drive folder). The latest change wins; deletions are synced too.
 - **Templates:** `$|$` marks where the cursor stops. With several `$|$` marks, Tab jumps to the next one. You can also use `{date}` and `{time}` variables.
@@ -137,7 +139,7 @@ Example: shortcut `rpt` → text `report`
    2. select RadExpand as the keyboard.
 
    Android shows a "may collect what you type" warning for every keyboard; RadExpand has no internet permission.
-3. When no physical keyboard is connected, a small bar appears on screen so you can switch to your usual keyboard.
+3. When you disconnect the physical keyboard, RadExpand switches to the on-screen keyboard (Samsung Keyboard or Gboard) by itself. Android does not switch back automatically when you reconnect: tap the keyboard icon in the navigation bar and choose RadExpand.
 
 **Automatic updates (optional):** the app itself never goes online. To get new versions automatically, add this repository (`https://github.com/Oraddi/radexpand`) to [Obtainium](https://obtainium.imranr.dev/).
 Updates install over the old version and your shortcuts are kept.

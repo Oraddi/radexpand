@@ -110,7 +110,15 @@ data class AppSettings(
     val checkUpdates: Boolean = true,
 
     // ---- Android
-    val onKeyboardDisconnect: DisconnectAction = DisconnectAction.SHOW_BAR,
+    /** Fiziksel klavye ayrilinca: varsayilan olarak ekran klavyesine (Samsung Klavye vb.) otomatik gecilir. */
+    val onKeyboardDisconnect: DisconnectAction = DisconnectAction.SWITCH_PREVIOUS,
+    /** Android: fiziksel klavyedeyken ekran klavyesine gecis tusu ([KeyCombo.encode]); null = atanmadi. */
+    /** Kisayol arama paneli (Espanso gibi): varsayilan Alt+Space; [searchCustomKey] atanirsa o tus. */
+    val searchKeyEnabled: Boolean = true,
+    val searchCustomKey: String? = null,
+    val searchCustomKeyLabel: String = "",
+    val screenKeyboardKey: String? = null,
+    val screenKeyboardKeyLabel: String = "",
 ) {
     fun toEngineConfig(): EngineConfig {
         val keyActions = mapOf(
@@ -174,6 +182,7 @@ enum class NoWordImport { AUTO_WORD_START, AUTO_ANYWHERE, MANUAL }
 
 /** Android: fiziksel klavye cikinca (D2). */
 @Serializable
+/** SWITCH_PREVIOUS: ekran klavyesine gec (adi eski kayitlarla uyum icin degismedi). */
 enum class DisconnectAction { SHOW_BAR, SWITCH_PREVIOUS }
 
 @Serializable
@@ -316,3 +325,7 @@ fun AppSettings.undoCombo(backspaceCode: Int): KeyCombo? = when (undoKey) {
     UndoKey.CUSTOM -> KeyCombo.parse(undoCustomKey)
     UndoKey.OFF, UndoKey.BACKSPACE -> null
 }
+
+/** Kisayol arama paneli tusu: varsayilan Alt+Space ([spaceCode]: platformun Space kodu); kapaliysa null. */
+fun AppSettings.searchCombo(spaceCode: Int): KeyCombo? =
+    if (!searchKeyEnabled) null else KeyCombo.parse(searchCustomKey) ?: KeyCombo(spaceCode, KeyCombo.ALT)

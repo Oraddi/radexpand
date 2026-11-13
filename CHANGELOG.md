@@ -1,5 +1,17 @@
 # Değişiklikler / Changelog
 
+## 0.4.0
+
+**Türkçe**
+- **Kısayol arama paneli (Alt + Space)**, Espanso'daki gibi: kayıtlı kısayollar listelenir, yazarak arayın, ↑↓ ile seçin, Enter ile yazdırın, Esc ile kapatın. Android'de klavye alanında, Windows'ta küçük bir pencerede açılır. Ayarlardan kapatılabilir ya da başka bir tuşa alınabilir.
+- Android: **fiziksel klavye ayrılınca ekran klavyesine otomatik geçiş** artık varsayılan; önce Samsung Klavye, yoksa Gboard seçilir (sesle yazma atlanır). Alt çubukta "Ekran klavyesi" ve "Hep otomatik geç" düğmeleri.
+- Android: isteğe bağlı **"Ekran klavyesine geçiş tuşu"**: fiziksel klavyedeyken seçim penceresi açmadan Samsung Klavye'ye geçer.
+
+**English**
+- **Shortcut search panel (Alt + Space)**, like Espanso: lists your saved shortcuts; type to search, ↑↓ to select, Enter to insert, Esc to close. On Android it opens in the keyboard area, on Windows in a small window. It can be turned off or moved to another key in Settings.
+- Android: **switching to the on-screen keyboard when the physical keyboard is disconnected** is now the default; Samsung Keyboard is preferred, otherwise Gboard (voice typing is skipped). The bottom bar has "On-screen keyboard" and "Always switch" buttons.
+- Android: optional **"switch to on-screen keyboard" key**: switches to Samsung Keyboard without the picker while on the physical keyboard.
+
 ## 0.3.2
 
 **Türkçe**

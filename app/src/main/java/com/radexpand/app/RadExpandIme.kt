@@ -1,6 +1,7 @@
 package com.radexpand.app
 
 import com.radexpand.core.undoCombo
+import com.radexpand.core.searchCombo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.inputmethodservice.InputMethodService
@@ -50,6 +51,12 @@ class RadExpandIme : InputMethodService() {
     @Volatile private var realConfig: EngineConfig = EngineConfig()
     @Volatile private var specialCombo: com.radexpand.core.KeyCombo? = null
     @Volatile private var undoCombo: com.radexpand.core.KeyCombo? = null
+    @Volatile private var screenCombo: com.radexpand.core.KeyCombo? = null
+    @Volatile private var searchCombo: com.radexpand.core.KeyCombo? = null
+
+    /** Alt+Space kisayol arama paneli acik mi. */
+    private var searching = false
+    private val searchPanel by lazy { SearchPanel(this, ::pickFromSearch) { closeSearch() } }
     private var testField = false
 
     override fun onCreate() {
@@ -74,6 +81,8 @@ class RadExpandIme : InputMethodService() {
         realConfig = d.settings.toEngineConfig()
         specialCombo = com.radexpand.core.KeyCombo.parse(d.settings.specialKey)
         undoCombo = d.settings.undoCombo(KeyEvent.KEYCODE_DEL)
+        screenCombo = com.radexpand.core.KeyCombo.parse(d.settings.screenKeyboardKey)
+        searchCombo = d.settings.searchCombo(KeyEvent.KEYCODE_SPACE)
         DiagLog.enabled = d.settings.diagnosticsEnabled
         if (!testField) {
             engine.index = realIndex
@@ -113,6 +122,7 @@ class RadExpandIme : InputMethodService() {
 
     override fun onFinishInput() {
         super.onFinishInput()
+        if (searching) closeSearch()
         engine.onFinishInput()
         CompatStats.flush()
     }
@@ -126,6 +136,11 @@ class RadExpandIme : InputMethodService() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        // Arama paneli acikken tuslar uygulamaya gitmez (basili tutma tekrarlari dahil).
+        if (searching) {
+            swallowed += keyCode
+            return searchPanel.onKeyDown(event)
+        }
         if (event.repeatCount > 0 && keyCode in swallowed) return true
         val ic = currentInputConnection
         if (ic == null || !currentInputStarted) return super.onKeyDown(keyCode, event)
@@ -133,6 +148,19 @@ class RadExpandIme : InputMethodService() {
         if (event.deviceId != lastDeviceId) {
             lastDeviceId = event.deviceId
             DiagLog.log("KLAVYE olayı geliyor: ${event.device?.name ?: "bilinmiyor"} (id=${event.deviceId})")
+        }
+        // Kisayol arama paneli (varsayilan Alt+Space). Parola alaninda ve RadExpand'in kendi ekranlarinda acilmaz.
+        if (event.repeatCount == 0 && KeyMapper.isCombo(event, searchCombo) && canSearch()) {
+            swallowed += keyCode
+            openSearch()
+            return true
+        }
+        // Ekran klavyesine gecis tusu (ayarlardan atanir): Samsung Klavye vb. acilir.
+        if (event.repeatCount == 0 && KeyMapper.isCombo(event, screenCombo)) {
+            DiagLog.log("TUŞ ekran klavyesine geçiş")
+            swallowed += keyCode
+            switchToScreenKeyboard()
+            return true
         }
         val key = KeyMapper.map(event, specialCombo, undoCombo)
         if (event.repeatCount == 0 && (key == KeyInput.CursorOrEdit || key == KeyInput.Backspace || key is KeyInput.Undo)) {
@@ -168,23 +196,106 @@ class RadExpandIme : InputMethodService() {
      * "fiziksel klavye varken ekran klavyesini goster" acikken de gosterirdi; RadExpand'in
      * ekran klavyesi olmadigi icin orada serit sadece yer kaplar.)
      */
-    /** D2: fiziksel klavye ayrilinca (ayar aciksa) onceki klavyeye gec. */
+    /** D2: fiziksel klavye ayrilinca (ayar aciksa) ekran klavyesine gec. */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val noHardware = newConfig.keyboard == Configuration.KEYBOARD_NOKEYS || newConfig.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES
-        if (noHardware && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
-            Repo.data.value.settings.onKeyboardDisconnect == com.radexpand.core.DisconnectAction.SWITCH_PREVIOUS
-        ) {
-            DiagLog.log("KLAVYE ayrıldı → önceki klavyeye geçiliyor")
-            runCatching { switchToPreviousInputMethod() }
+        if (!hasHardwareKeyboard(newConfig) && autoSwitch()) {
+            DiagLog.log("KLAVYE ayrıldı → ekran klavyesine geçiliyor")
+            switchToScreenKeyboard()
         }
     }
 
+    /** Yazma alani acildiginda fiziksel klavye yoksa (degisiklik bildirimi kacmis olsa bile) ekran klavyesine gec. */
+    override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
+        super.onStartInputView(info, restarting)
+        if (!hasHardwareKeyboard(resources.configuration) && autoSwitch()) {
+            DiagLog.log("KLAVYE yok → ekran klavyesine geçiliyor")
+            switchToScreenKeyboard()
+        }
+    }
+
+    private fun autoSwitch() = Repo.data.value.settings.onKeyboardDisconnect == com.radexpand.core.DisconnectAction.SWITCH_PREVIOUS
+
+    private fun hasHardwareKeyboard(c: Configuration) =
+        c.keyboard != Configuration.KEYBOARD_NOKEYS && c.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
+
+    /**
+     * Gecilecek ekran klavyesi: once Samsung Klavye, sonra Gboard, yoksa etkin baska bir yazi klavyesi
+     * (sesle yazma gibi klavye olmayanlar atlanir).
+     */
+    private fun screenKeyboardId(): String? {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        val list = runCatching { imm.enabledInputMethodList }.getOrNull().orEmpty().filter { it.packageName != packageName }
+        fun isKeyboard(i: android.view.inputmethod.InputMethodInfo) =
+            !i.id.contains("voice", ignoreCase = true) &&
+                (i.subtypeCount == 0 || (0 until i.subtypeCount).any { i.getSubtypeAt(it).mode == "keyboard" })
+        return (list.firstOrNull { it.packageName == "com.samsung.android.honeyboard" }
+            ?: list.firstOrNull { it.packageName == "com.google.android.inputmethod.latin" }
+            ?: list.firstOrNull { isKeyboard(it) })?.id
+    }
+
+    private fun switchToScreenKeyboard() {
+        val id = screenKeyboardId()
+        runCatching {
+            when {
+                id != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> switchInputMethod(id)
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> switchToPreviousInputMethod()
+                else -> (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
+            }
+        }.onFailure { DiagLog.log("HATA klavye geçişi: ${it.javaClass.simpleName}") }
+    }
+
+    override fun onShowInputRequested(flags: Int, configChange: Boolean): Boolean =
+        searching || super.onShowInputRequested(flags, configChange)
+
     override fun onEvaluateInputViewShown(): Boolean {
+        if (searching) return true
         val c = resources.configuration
         val hardware = c.keyboard != Configuration.KEYBOARD_NOKEYS &&
             c.hardKeyboardHidden != Configuration.HARDKEYBOARDHIDDEN_YES
         return !hardware
+    }
+
+    // ------------------------------------------------------------------ kisayol arama (Alt+Space)
+
+    private fun canSearch(): Boolean {
+        val info = currentInputEditorInfo ?: return false
+        if (currentInputConnection == null || !engine.config.enabled) return false
+        return !KeyMapper.fieldInfo(info).isPassword
+    }
+
+    private fun openSearch() {
+        searching = true
+        DiagLog.log("ARAMA paneli açıldı")
+        searchPanel.open(engine.index.byTrigger.values, if (testField) emptyMap() else CompatStats.usage.value)
+        setInputView(searchPanel.view)
+        updateInputViewShown()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) requestShowSelf(0) else showWindow(true)
+    }
+
+    private fun closeSearch() {
+        if (!searching) return
+        searching = false
+        setInputView(onCreateInputView())
+        updateInputViewShown()
+        if (hasHardwareKeyboard(resources.configuration)) requestHideSelf(0)
+    }
+
+    private fun pickFromSearch(s: com.radexpand.core.Shortcut) {
+        val ic = currentInputConnection
+        val pkg = currentInputEditorInfo?.packageName ?: "?"
+        closeSearch()
+        if (ic == null) return
+        val (text, back) = com.radexpand.core.ShortcutSearch.output(s)
+        port.attach(ic, KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+        try {
+            port.replaceBeforeCursor(0, text, back)
+        } finally {
+            port.detach()
+        }
+        engine.onExternalCursorMove()
+        if (!testField) CompatStats.onExpansion(pkg, s.trigger)
+        DiagLog.log("ARAMA ile yazıldı '${s.trigger}'")
     }
 
     /** Fiziksel klavye bagli DEGILKEN gorunen kucuk cubuk. */
@@ -201,10 +312,17 @@ class RadExpandIme : InputMethodService() {
                 setTextColor(Color.WHITE)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
             })
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            addView(Button(context).apply {
+                text = com.radexpand.core.tx("Ekran klavyesi", "On-screen keyboard")
+                setOnClickListener { switchToScreenKeyboard() }
+            })
+            if (!autoSwitch()) {
                 addView(Button(context).apply {
-                    text = com.radexpand.core.tx("Önceki klavye", "Previous keyboard")
-                    setOnClickListener { switchToPreviousInputMethod() }
+                    text = com.radexpand.core.tx("Hep otomatik geç", "Always switch")
+                    setOnClickListener {
+                        Repo.update { it.copy(settings = it.settings.copy(onKeyboardDisconnect = com.radexpand.core.DisconnectAction.SWITCH_PREVIOUS)) }
+                        switchToScreenKeyboard()
+                    }
                 })
             }
             addView(Button(context).apply {

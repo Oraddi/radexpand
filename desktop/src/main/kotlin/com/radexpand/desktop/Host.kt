@@ -1,6 +1,11 @@
 package com.radexpand.desktop
 
 import com.radexpand.core.undoCombo
+import com.radexpand.core.searchCombo
+import com.radexpand.core.Shortcut
+import com.radexpand.core.ShortcutSearch
+import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinDef
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -136,6 +141,13 @@ object Host {
     private var settings = com.radexpand.core.AppSettings()
     private var specialCombo: KeyCombo? = null
     private var undoCombo: KeyCombo? = null
+    private var searchCombo: KeyCombo? = null
+
+    /** Kisayol arama paneli istegi (Alt+Space). [target]: secimden sonra donulecek pencere. */
+    class SearchRequest(val target: WinDef.HWND?, val exe: String, val shortcuts: List<Shortcut>)
+
+    private val _search = MutableStateFlow<SearchRequest?>(null)
+    val search: StateFlow<SearchRequest?> get() = _search
     private var pauseCombo: KeyCombo? = null
     private var hook: KeyboardHook? = null
 
@@ -170,6 +182,7 @@ object Host {
         settings = d.settings
         specialCombo = KeyCombo.parse(d.settings.specialKey)
         undoCombo = d.settings.undoCombo(Vk.BACK)
+        searchCombo = d.settings.searchCombo(Vk.SPACE)
         pauseCombo = KeyCombo.parse(d.settings.pauseHotkey)
         DesktopDiag.enabled = d.settings.diagnosticsEnabled
         // .exe adlari buyuk/kucuk harf farki gozetmeden karsilastirilir
@@ -225,6 +238,18 @@ object Host {
         }
         checkForeground()
         if (paused) return false to emptyList()
+        // Kisayol arama paneli (varsayilan Alt+Space). RadExpand'in kendi penceresinde ve kapali programlarda acilmaz.
+        if (WinKeys.isCombo(vk, searchCombo) && engine.config.enabled && !ownWindow) {
+            val (hwnd, exe) = WinProcess.foreground()
+            if (exe.lowercase() !in baseConfig.disabledPackages) {
+                swallowedUp += vk
+                // Alt tek basina birakilinca Word vb. menu kisayollarini acmasin: atanmamis bir tus (0xE8) araya girer.
+                worker.execute { Injector.send(Injector.tap(0xE8)) }
+                _search.value = SearchRequest(hwnd, exe.lowercase(), engine.index.byTrigger.values.toList())
+                DesktopDiag.log("ARAMA paneli açıldı")
+                return true to emptyList()
+            }
+        }
         val base = if (WinKeys.isCombo(vk, specialCombo)) com.radexpand.core.KeyInput.Trigger(TriggerKey.SPECIAL) else WinKeys.map(vk, scan)
         // Geri alma tusu (varsayilan Shift+Backspace): genisletme yoksa normal tus olarak islenir.
         val key = if (WinKeys.isCombo(vk, undoCombo)) com.radexpand.core.KeyInput.Undo(base) else base
@@ -266,6 +291,29 @@ object Host {
             }
             if (decision.first) perform(decision.second)
             else Injector.replay(k[0], k[1], up = k[3] == 0, extended = (k[2] and 0x01) != 0)
+        }
+    }
+
+    /** Arama panelini kapat; [restoreFocus] ise onceki pencereye don. */
+    fun closeSearch(restoreFocus: Boolean) {
+        val r = _search.value ?: return
+        _search.value = null
+        if (restoreFocus) r.target?.let { t -> worker.execute { User32.INSTANCE.SetForegroundWindow(t) } }
+    }
+
+    /** Arama panelinde secilen kisayolu onceki pencereye yaz. */
+    fun pickSearch(s: Shortcut) {
+        val r = _search.value ?: return
+        _search.value = null
+        val (text, back) = ShortcutSearch.output(s)
+        worker.execute {
+            r.target?.let { User32.INSTANCE.SetForegroundWindow(it) }
+            Thread.sleep(150) // pencere one gelsin
+            synchronized(lock) { injecting = true }
+            runActions(listOf(Action.Replace(0, text, back)))
+            synchronized(lock) { if (::engine.isInitialized) engine.onExternalCursorMove() }
+            DesktopStats.onExpansion(r.exe, s.trigger)
+            DesktopDiag.log("ARAMA ile yazıldı '${s.trigger}'")
         }
     }
 

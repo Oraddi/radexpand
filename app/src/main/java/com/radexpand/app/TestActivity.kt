@@ -66,6 +66,7 @@ class TestActivity : Activity(), InputManager.InputDeviceListener {
         TestCase("19. Cümle başında büyük harf", "Ri + Space", "Hiperintensite "),
         TestCase("20. İmleç işareti (şablon)", "kcc + Space + 152", "Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür."),
         TestCase("21. Backspace normal siler", "ri + Space + Backspace", "hiperintensite"),
+        TestCase("22. Kısayol arama paneli", "Alt+Space, kcc, Enter, 152", "Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür."),
     )
 
     private val rows = ArrayList<Row>()

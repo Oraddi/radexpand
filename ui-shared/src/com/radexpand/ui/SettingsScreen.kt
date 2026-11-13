@@ -157,6 +157,57 @@ fun SettingsScreen(data: RadExpandData, store: DataStore, platform: PlatformSett
             }
         }
 
+        Card(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SwitchRow(
+                    t("Kısayol arama paneli", "Shortcut search panel"),
+                    t(
+                        "Kısayol tuşuna basınca kayıtlı kısayollar listelenir (Espanso'daki gibi): yazarak arayın, ↑↓ ile seçin, Enter ile yazdırın, Esc ile kapatın.",
+                        "Press the key to list your saved shortcuts (like Espanso): type to search, ↑↓ to select, Enter to insert, Esc to close.",
+                    ),
+                    s.searchKeyEnabled,
+                ) { v -> set { it.copy(searchKeyEnabled = v) } }
+                if (s.searchKeyEnabled) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(if (s.searchCustomKey == null) "Alt + Space" else s.searchCustomKeyLabel, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                        OutlinedButton(onClick = {
+                            capturing = "search"
+                            platform.startKeyCapture { code, label ->
+                                capturing = null
+                                if (code != null) set { it.copy(searchCustomKey = code, searchCustomKeyLabel = label) }
+                            }
+                        }) { Text(t("Başka tuş ata", "Assign another key")) }
+                        if (s.searchCustomKey != null) TextButton(onClick = { set { it.copy(searchCustomKey = null, searchCustomKeyLabel = "") } }) { Text(t("Alt + Space'e dön", "Back to Alt + Space")) }
+                    }
+                }
+            }
+        }
+
+        if (!platform.isWindows) {
+            Card(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(t("Ekran klavyesine geçiş tuşu", "Switch-to-screen-keyboard key"), fontWeight = FontWeight.Bold)
+                    Hint(
+                        t(
+                            "Fiziksel klavyedeyken bu tuşa basınca ekran klavyesine (Samsung Klavye vb.) geçilir; seçim penceresi açılmaz. Ekranda görünmesi için Android'de \"Fiziksel klavye → Ekran klavyesini göster\" açık olmalı.",
+                            "While on the physical keyboard, this key switches to the on-screen keyboard (Samsung Keyboard etc.) without the picker. For it to appear, Android's \"Physical keyboard → Show on-screen keyboard\" must be on.",
+                        ),
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(if (s.screenKeyboardKey == null) t("Atanmadı", "Not assigned") else s.screenKeyboardKeyLabel, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                        OutlinedButton(onClick = {
+                            capturing = "screen"
+                            platform.startKeyCapture { code, label ->
+                                capturing = null
+                                if (code != null) set { it.copy(screenKeyboardKey = code, screenKeyboardKeyLabel = label) }
+                            }
+                        }) { Text(t("Tuş ata", "Assign key")) }
+                        if (s.screenKeyboardKey != null) TextButton(onClick = { set { it.copy(screenKeyboardKey = null, screenKeyboardKeyLabel = "") } }) { Text(t("Kaldır", "Remove")) }
+                    }
+                }
+            }
+        }
+
         // ------------------------------------------------------------ kelime davranislari
         SectionTitle(t("Kelime davranışları", "Word behaviour"))
         SwitchRow(

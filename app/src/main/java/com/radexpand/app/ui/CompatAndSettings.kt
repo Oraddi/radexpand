@@ -103,15 +103,15 @@ fun AndroidSettings(data: RadExpandData) {
                 }
                 SectionTitle(t("Fiziksel klavye çıkınca", "When the physical keyboard is disconnected"))
                 ChoiceRow("") {
-                    FilterChip(data.settings.onKeyboardDisconnect == DisconnectAction.SHOW_BAR, { setSettings { it.copy(onKeyboardDisconnect = DisconnectAction.SHOW_BAR) } }, { Text(t("Alt şeridi göster", "Show the bottom bar")) })
                     if (Build.VERSION.SDK_INT >= 28) {
-                        FilterChip(data.settings.onKeyboardDisconnect == DisconnectAction.SWITCH_PREVIOUS, { setSettings { it.copy(onKeyboardDisconnect = DisconnectAction.SWITCH_PREVIOUS) } }, { Text(t("Önceki klavyeye geç", "Switch to previous keyboard")) })
+                        FilterChip(data.settings.onKeyboardDisconnect == DisconnectAction.SWITCH_PREVIOUS, { setSettings { it.copy(onKeyboardDisconnect = DisconnectAction.SWITCH_PREVIOUS) } }, { Text(t("Ekran klavyesine otomatik geç", "Switch to on-screen keyboard")) })
                     }
+                    FilterChip(data.settings.onKeyboardDisconnect == DisconnectAction.SHOW_BAR, { setSettings { it.copy(onKeyboardDisconnect = DisconnectAction.SHOW_BAR) } }, { Text(t("Alt şeridi göster", "Show the bottom bar")) })
                 }
                 Hint(
                     t(
-                        "RadExpand'in ekran klavyesi yoktur. \"Önceki klavyeye geç\" seçilirse fiziksel klavye ayrılınca otomatik olarak Samsung Klavye'ye (ya da önceki klavyeye) geçilir. Klavye geri takılınca RadExpand'e dönüşü Android otomatik yaptırmaz: hızlı ayar kutucuğundan ya da \"Klavye seç\" ile dönün.",
-                        "RadExpand has no on-screen keyboard. With \"Switch to previous keyboard\", Android switches back automatically when the physical keyboard disconnects. Returning to RadExpand is not automatic on Android: use the quick settings tile or \"Choose keyboard\".",
+                        "RadExpand'in ekran klavyesi yoktur. Fiziksel klavye ayrılınca otomatik olarak ekran klavyesine (önce Samsung Klavye, yoksa Gboard) geçilir. Klavyeyi geri takınca RadExpand'e dönüşü Android kendiliğinden yaptırmaz: alt çubuktaki klavye simgesine dokunup RadExpand'i seçin.",
+                        "RadExpand has no on-screen keyboard. When the physical keyboard is disconnected, Android switches to the on-screen keyboard (Samsung Keyboard first, otherwise Gboard). Android does not switch back automatically when you reconnect it: tap the keyboard icon in the navigation bar and choose RadExpand.",
                     ),
                 )
                 SectionTitle(t("Hakkında", "About"))
