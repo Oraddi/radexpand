@@ -2,6 +2,7 @@
 
 package com.radexpand.app.ui
 
+import androidx.compose.material3.Button
 import com.radexpand.ui.PerAppSection
 import com.radexpand.core.KnownApps
 import android.content.ClipData
@@ -114,13 +115,26 @@ fun AndroidSettings(data: RadExpandData) {
                         "RadExpand has no on-screen keyboard. When the physical keyboard is disconnected, Android switches to the on-screen keyboard (Samsung Keyboard first, otherwise Gboard). Android does not switch back automatically when you reconnect it: tap the keyboard icon in the navigation bar and choose RadExpand.",
                     ),
                 )
-                SectionTitle(t("Hakkında", "About"))
+                SectionTitle(t("Güncelleme", "Updates"))
                 val version = remember { runCatching { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName }.getOrNull() ?: "?" }
+                Text(t("Bu sürüm: ", "This version: ") + version)
+                Hint(
+                    t(
+                        "RadExpand'in internet izni yoktur; güncellemeyi tarayıcı indirir. \"Son sürümü indir\" GitHub'daki en yeni APK'yı tarayıcıda indirir. İndirme bitince bildirime dokunun → \"Güncelle\". Kısayollarınız ve ayarlarınız korunur. (İlk seferde Android, tarayıcıya \"bilinmeyen uygulama yükleme\" izni sorabilir.)",
+                        "RadExpand has no internet permission; the browser downloads the update. \"Download latest version\" downloads the newest APK from GitHub in the browser. When it finishes, tap the notification → \"Update\". Your shortcuts and settings are kept. (The first time, Android may ask to allow the browser to install unknown apps.)",
+                    ),
+                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { openUrl(ctx, "https://github.com/Oraddi/radexpand/releases/latest/download/RadExpand.apk") }) { Text(t("Son sürümü indir", "Download latest version")) }
+                    OutlinedButton(onClick = { openUrl(ctx, "https://github.com/Oraddi/radexpand/releases/latest") }) { Text(t("Sürüm notları", "Release notes")) }
+                }
+                Hint(t("Otomatik takip için: Obtainium uygulamasına github.com/Oraddi/radexpand adresini ekleyin; yeni sürüm çıkınca haber verir.", "For automatic tracking: add github.com/Oraddi/radexpand to the Obtainium app; it notifies you of new versions."))
+                SectionTitle(t("Hakkında", "About"))
                 Text("RadExpand $version · MIT")
                 Hint(
                     t(
-                        "RadExpand'in internet izni yoktur. Kısayollar yalnızca bu tablette (ve sizin seçtiğiniz senkron dosyasında) durur. Yeni sürümler: github.com/Oraddi/radexpand (Obtainium uygulamasıyla otomatik takip edebilirsiniz).",
-                        "RadExpand has no internet permission. Shortcuts live only on this tablet (and in the sync file you choose). New versions: github.com/Oraddi/radexpand (you can follow them automatically with the Obtainium app).",
+                        "Kısayollar yalnızca bu cihazda (ve sizin seçtiğiniz senkron dosyasında) durur. Yazdığınız hiçbir şey cihazdan çıkmaz.",
+                        "Shortcuts live only on this device (and in the sync file you choose). Nothing you type leaves the device.",
                     ),
                 )
             },
@@ -197,3 +211,9 @@ private fun copyReport(ctx: Context, stats: Map<String, CompatStats.AppStat>, da
 
 @Suppress("unused")
 private fun openKeyboardSettings(ctx: Context) = openSystem(ctx, Settings.ACTION_INPUT_METHOD_SETTINGS)
+
+/** Baglantiyi tarayicida ac (uygulamanin kendisi internete cikmaz). */
+private fun openUrl(ctx: Context, url: String) {
+    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+        .onFailure { android.widget.Toast.makeText(ctx, t("Tarayıcı açılamadı: ", "Could not open the browser: ") + url, android.widget.Toast.LENGTH_LONG).show() }
+}

@@ -52,6 +52,7 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 | Dosya | Ne için |
 |---|---|
 | `RadExpand-x.y.z.apk` | Android 8 ve üstü (fiziksel klavyeyle) |
+| `RadExpand.apk` | Aynı APK, sabit adla (her zaman en yeni sürüm) |
 | `RadExpand-x.y.z.msi` | Windows 10/11 kurulum dosyası (yönetici izni gerekmez) |
 | `RadExpand-Windows-x.y.z.zip` | Windows taşınabilir sürüm (kurulumsuz) |
 
@@ -65,7 +66,9 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 3. Türkçe karakterler yanlış çıkarsa: **Ayarlar → Fiziksel klavye düzeni → Türkçe Q**.
 4. Fiziksel klavyeyi çıkarınca RadExpand kendiliğinden ekran klavyesine (Samsung Klavye ya da Gboard) geçer. Klavyeyi geri takınca Android otomatik dönmez: alt çubuktaki klavye simgesine dokunup RadExpand'i seçin.
 
-**Otomatik güncelleme (isteğe bağlı):** Uygulamanın kendisi internete çıkmaz. Yeni sürümleri otomatik almak için [Obtainium](https://obtainium.imranr.dev/) uygulamasına bu sayfanın adresini (`https://github.com/Oraddi/radexpand`) ekleyin.
+**Güncelleme:** Uygulamada **Ayarlar → Güncelleme → Son sürümü indir** en yeni APK'yı tarayıcıda indirir; bildirime dokunup "Güncelle" deyin. Ya da doğrudan: https://github.com/Oraddi/radexpand/releases/latest/download/RadExpand.apk
+
+**Otomatik takip (isteğe bağlı):** Uygulamanın kendisi internete çıkmaz. Yeni sürümleri otomatik almak için [Obtainium](https://obtainium.imranr.dev/) uygulamasına bu sayfanın adresini (`https://github.com/Oraddi/radexpand`) ekleyin.
 Güncellemeler eski sürümün üzerine kurulur ve kısayollarınız kalır.
 
 ### Windows kurulumu
@@ -136,6 +139,7 @@ Example: shortcut `rpt` → text `report`
 | File | For |
 |---|---|
 | `RadExpand-x.y.z.apk` | Android 8 or later, with a physical keyboard |
+| `RadExpand.apk` | The same APK under a fixed name (always the newest) |
 | `RadExpand-x.y.z.msi` | Windows 10/11 installer (no admin rights needed) |
 | `RadExpand-Windows-x.y.z.zip` | Windows portable (no install) |
 
@@ -148,7 +152,9 @@ Example: shortcut `rpt` → text `report`
    Android shows a "may collect what you type" warning for every keyboard; RadExpand has no internet permission.
 3. When you disconnect the physical keyboard, RadExpand switches to the on-screen keyboard (Samsung Keyboard or Gboard) by itself. Android does not switch back automatically when you reconnect: tap the keyboard icon in the navigation bar and choose RadExpand.
 
-**Automatic updates (optional):** the app itself never goes online. To get new versions automatically, add this repository (`https://github.com/Oraddi/radexpand`) to [Obtainium](https://obtainium.imranr.dev/).
+**Updating:** in the app, **Settings → Updates → Download latest version** downloads the newest APK in the browser; tap the notification and choose "Update". Or directly: https://github.com/Oraddi/radexpand/releases/latest/download/RadExpand.apk
+
+**Automatic tracking (optional):** the app itself never goes online. To get new versions automatically, add this repository (`https://github.com/Oraddi/radexpand`) to [Obtainium](https://obtainium.imranr.dev/).
 Updates install over the old version and your shortcuts are kept.
 
 ### Windows setup

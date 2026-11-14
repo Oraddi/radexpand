@@ -1,5 +1,15 @@
 # Değişiklikler / Changelog
 
+## 0.4.2
+
+**Türkçe**
+- Android: Ayarlar → Güncelleme → **"Son sürümü indir"**: GitHub'daki en yeni APK tarayıcıda indirilir, bildirime dokunup "Güncelle" denir. Kısayollar ve ayarlar korunur. Uygulamanın kendisi yine internete bağlanmaz.
+- Her sürümde sabit adlı `RadExpand.apk` da yayımlanır (her zaman en yeni sürüm).
+
+**English**
+- Android: Settings → Updates → **"Download latest version"**: the newest APK is downloaded from GitHub in the browser; tap the notification and choose "Update". Shortcuts and settings are kept. The app itself still does not connect to the internet.
+- Every release also includes a fixed-name `RadExpand.apk` (always the newest version).
+
 ## 0.4.1
 
 **Türkçe**

@@ -49,6 +49,8 @@ jobs:
           ./gradlew --no-daemon :core:test :app:assembleRelease
           mkdir -p out
           cp app/build/outputs/apk/release/app-release.apk "out/RadExpand-${{ steps.ver.outputs.version }}.apk"
+          # Sabit adli kopya: .../releases/latest/download/RadExpand.apk her zaman en yeni APK'yi indirir
+          cp app/build/outputs/apk/release/app-release.apk out/RadExpand.apk
           rm -f "$RUNNER_TEMP/radexpand.jks"
       - uses: actions/upload-artifact@v4
         with:
