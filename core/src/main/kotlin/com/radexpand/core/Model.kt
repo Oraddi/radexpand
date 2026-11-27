@@ -123,6 +123,10 @@ data class EngineConfig(
      * editor metni okunamadigi icin varsayilan ACIK (Espanso ile ayni davranis).
      */
     val unknownStartIsBoundary: Boolean = false,
+    /** Kelime onerisi ("mut" -> "mutfak", Tab ile kabul). Motorun [ExpansionEngine.suggester] ayarlanmis olmali. */
+    val suggestions: Boolean = false,
+    /** Oneri icin en az kac harf yazilmis olmali. */
+    val suggestMinLetters: Int = 3,
 )
 
 /**

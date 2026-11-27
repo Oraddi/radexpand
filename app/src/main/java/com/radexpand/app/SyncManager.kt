@@ -111,10 +111,11 @@ object SyncManager {
                     var msg = com.radexpand.core.tx("Dosya boştu; tablet verisi yazıldı.", "The file was empty; the tablet data was written.")
                     if (text.isNotBlank()) {
                         val remote = DataCodec.decode(text)
-                        val r = SyncMerge.merge(Repo.data.value.shortcuts, remote.shortcuts)
-                        if (r.changed) {
-                            if (Repo.data.value.settings.backupBeforeSync) Repo.backup("senkron-oncesi")
-                            Repo.update { it.copy(shortcuts = r.shortcuts) }
+                        val m = com.radexpand.core.DataMerge.merge(Repo.data.value, remote)
+                        val r = m.shortcuts
+                        if (m.changed) {
+                            if (r.changed && Repo.data.value.settings.backupBeforeSync) Repo.backup("senkron-oncesi")
+                            Repo.update { it.copy(shortcuts = m.data.shortcuts, words = m.data.words, wordsClearedAt = m.data.wordsClearedAt) }
                         }
                         msg = com.radexpand.core.tx("Diğer cihazdan ${r.fromRemote} değişiklik alındı, bu cihazdan ${r.fromLocal} gönderildi.", "${r.fromRemote} changes received from the other device, ${r.fromLocal} sent from this one.")
                     }
@@ -149,8 +150,8 @@ object SyncManager {
     }
 
     private fun writeSync(uri: Uri, d: RadExpandData) {
-        // Senkron dosyasina yalnizca kisayollar yazilir; cihaz ayarlari her cihazda ayridir.
-        val out = RadExpandData(shortcuts = d.shortcuts)
+        // Senkron dosyasina kisayollar ve ogrenilen kelimeler yazilir; cihaz ayarlari her cihazda ayridir.
+        val out = RadExpandData(shortcuts = d.shortcuts, words = d.words, wordsClearedAt = d.wordsClearedAt)
         ctx.contentResolver.openOutputStream(uri, "wt")?.use { it.write(DataCodec.encode(out).toByteArray()) }
             ?: error("dosya yazmak için açılamadı")
     }

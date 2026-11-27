@@ -54,6 +54,13 @@ class RadExpandIme : InputMethodService() {
     @Volatile private var screenCombo: com.radexpand.core.KeyCombo? = null
     @Volatile private var searchCombo: com.radexpand.core.KeyCombo? = null
 
+    /** Ogrenilen kelimeler (bellekte); duzenli araliklarla Repo'ya yazilir. */
+    private val learner = com.radexpand.core.WordLearner()
+    private var suggesterKey: Any? = null
+    private var suggestionBar: SuggestionBar? = null
+    private var candidatesShown = false
+    private val flushWords = Runnable { saveWords() }
+
     /** Alt+Space kisayol arama paneli acik mi. */
     private var searching = false
     private val searchPanel by lazy { SearchPanel(this, ::pickFromSearch) { closeSearch() } }
@@ -66,6 +73,15 @@ class RadExpandIme : InputMethodService() {
         SyncManager.init(this)
         engine = ExpansionEngine(realIndex, realConfig, DiagLog)
         engine.observer = CompatStats
+        learner.mergeFrom(Repo.data.value.words, Repo.data.value.wordsClearedAt)
+        engine.onWordCompleted = { w ->
+            if (!testField && Repo.data.value.settings.learnWords) {
+                learner.learn(w, System.currentTimeMillis())
+                handler.removeCallbacks(flushWords)
+                handler.postDelayed(flushWords, 60_000)
+            }
+        }
+        engine.onSuggestions = { list, _ -> showSuggestions(list) }
         com.radexpand.core.Lang.lang = com.radexpand.core.Lang.defaultFor(Repo.data.value.settings.language)
         applyData(Repo.data.value)
         Repo.addListener(dataListener)
@@ -87,6 +103,67 @@ class RadExpandIme : InputMethodService() {
         if (!testField) {
             engine.index = realIndex
             engine.config = realConfig
+        }
+        learner.mergeFrom(d.words, d.wordsClearedAt)
+        // Oneri kaynaklari yalnizca ilgili ayar ya da kisayol metinleri degisince yeniden kurulur.
+        val s = d.settings
+        val general = s.suggestGeneralList && com.radexpand.core.Lang.defaultFor(s.language) == "tr"
+        val texts = d.active.filter { it.enabled }.map { it.replacement }
+        val key = Triple(general, s.suggestMedicalList, texts.hashCode())
+        if (key != suggesterKey) {
+            suggesterKey = key
+            // Listeler ilk kullanimda yuklenir (kucuk bir gecikme olabilir); ana is parcacigini bekletmemek icin arka planda.
+            Thread {
+                val sg = com.radexpand.core.Suggester(
+                    if (general) com.radexpand.core.WordLists.turkishGeneral else emptyList(),
+                    if (s.suggestMedicalList) com.radexpand.core.WordLists.turkishMedical + com.radexpand.core.WordLists.englishMedical else emptyList(),
+                    com.radexpand.core.Suggester.wordsOf(texts),
+                    learner,
+                )
+                handler.post { engine.suggester = sg }
+            }.start()
+        }
+    }
+
+    /** Ogrenilen kelimeleri (degistiyse) kaydet; senkron dosyasi bunlari diger cihazlara tasir. */
+    private fun saveWords() {
+        if (!learner.dirty) return
+        val words = learner.snapshot()
+        val cleared = learner.clearedAt
+        Repo.update { it.copy(words = words, wordsClearedAt = maxOf(it.wordsClearedAt, cleared)) }
+    }
+
+    // ------------------------------------------------------------------ kelime onerisi cubugu
+
+    override fun onCreateCandidatesView(): View {
+        val bar = SuggestionBar(this) { w -> acceptFromBar(w) }
+        suggestionBar = bar
+        return bar.view
+    }
+
+    private fun showSuggestions(list: List<String>) {
+        if (list.isNotEmpty() && !candidatesShown) {
+            // Ilk oneride cubuk acilir ve alan boyunca acik kalir (her harfte acilip kapanip ekrani oynatmasin).
+            setCandidatesViewShown(true)
+            candidatesShown = true
+        }
+        suggestionBar?.show(list)
+    }
+
+    private fun hideSuggestionBar() {
+        if (!candidatesShown) return
+        candidatesShown = false
+        suggestionBar?.show(emptyList())
+        setCandidatesViewShown(false)
+    }
+
+    private fun acceptFromBar(word: String) {
+        val ic = currentInputConnection ?: return
+        port.attach(ic, KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_TAB))
+        try {
+            engine.acceptSuggestion(word, port)
+        } finally {
+            port.detach()
         }
     }
 
@@ -123,6 +200,9 @@ class RadExpandIme : InputMethodService() {
     override fun onFinishInput() {
         super.onFinishInput()
         if (searching) closeSearch()
+        hideSuggestionBar()
+        handler.removeCallbacks(flushWords)
+        saveWords()
         engine.onFinishInput()
         CompatStats.flush()
     }

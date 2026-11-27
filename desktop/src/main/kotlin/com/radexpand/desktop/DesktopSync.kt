@@ -3,6 +3,7 @@ package com.radexpand.desktop
 import com.radexpand.core.DataCodec
 import com.radexpand.core.RadExpandData
 import com.radexpand.core.SyncMerge
+import com.radexpand.core.forSync
 import com.radexpand.core.tx
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,12 +69,15 @@ object DesktopSync {
             var remoteSame = false
             if (f.exists() && f.length() > 0) {
                 val remote = DataCodec.decode(f.readText(Charsets.UTF_8))
-                val r = SyncMerge.merge(DesktopStore.data.value.shortcuts, remote.shortcuts)
-                if (r.changed) {
-                    if (DesktopStore.data.value.settings.backupBeforeSync) DesktopStore.backup("senkron-oncesi")
-                    DesktopStore.update { it.copy(shortcuts = r.shortcuts) }
+                val m = com.radexpand.core.DataMerge.merge(DesktopStore.data.value, remote)
+                val r = m.shortcuts
+                if (m.changed) {
+                    if (r.changed && DesktopStore.data.value.settings.backupBeforeSync) DesktopStore.backup("senkron-oncesi")
+                    DesktopStore.update { it.copy(shortcuts = m.data.shortcuts, words = m.data.words, wordsClearedAt = m.data.wordsClearedAt) }
                 }
-                remoteSame = remote.shortcuts.sortedBy { it.id } == DesktopStore.data.value.shortcuts.sortedBy { it.id }
+                val now = DesktopStore.data.value
+                remoteSame = remote.shortcuts.sortedBy { it.id } == now.shortcuts.sortedBy { it.id } &&
+                    remote.words.toSet() == now.words.toSet() && remote.wordsClearedAt == now.wordsClearedAt
                 msg = tx("Diğer cihazdan ${r.fromRemote} değişiklik alındı, bu bilgisayardan ${r.fromLocal} gönderildi.", "${r.fromRemote} changes received from the other device, ${r.fromLocal} sent from this computer.")
             }
             // Dosya zaten guncelse yazma (Drive gibi araclarin tarih degisikligiyle sonsuz dongu olmasin).
@@ -87,7 +91,7 @@ object DesktopSync {
 
     private fun write(f: File, d: RadExpandData) {
         f.parentFile?.mkdirs()
-        f.writeText(DataCodec.encode(RadExpandData(shortcuts = d.shortcuts)), Charsets.UTF_8)
+        f.writeText(DataCodec.encode(d.forSync()), Charsets.UTF_8)
         lastSeen = f.lastModified()
     }
 

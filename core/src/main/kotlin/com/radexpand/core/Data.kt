@@ -114,6 +114,14 @@ data class AppSettings(
     val onKeyboardDisconnect: DisconnectAction = DisconnectAction.SWITCH_PREVIOUS,
     /** Android: fiziksel klavyedeyken ekran klavyesine gecis tusu ([KeyCombo.encode]); null = atanmadi. */
     /** Kisayol arama paneli (Espanso gibi): varsayilan Alt+Space; [searchCustomKey] atanirsa o tus. */
+    /** Kelime onerisi (Google Dokumanlar gibi): yazarken kelimeyi tamamla, Tab ile kabul et. */
+    val suggestionsEnabled: Boolean = true,
+    /** Yazdiginiz kelimeleri ogren (yalnizca bu cihazda ve kendi senkron dosyanizda; parola alanlarinda asla). */
+    val learnWords: Boolean = true,
+    val suggestMinLetters: Int = 3,
+    /** Hazir listeler: Turkce genel kelimeler (FrequencyWords) ve tip/radyoloji terimleri. */
+    val suggestGeneralList: Boolean = true,
+    val suggestMedicalList: Boolean = true,
     val searchKeyEnabled: Boolean = true,
     val searchCustomKey: String? = null,
     val searchCustomKeyLabel: String = "",
@@ -146,6 +154,8 @@ data class AppSettings(
             words = WordRules(apostropheIsWord, hyphenIsWord, slashIsWord),
             caseMode = caseMode,
             minUpperLetters = minUpperLetters.coerceIn(1, 10),
+            suggestions = suggestionsEnabled,
+            suggestMinLetters = suggestMinLetters.coerceIn(2, 6),
         )
     }
 }
@@ -191,6 +201,10 @@ data class RadExpandData(
     val version: Int = 1,
     val shortcuts: List<ShortcutRecord> = emptyList(),
     val settings: AppSettings = AppSettings(),
+    /** Ogrenilen kelimeler (kelime onerisi icin; cihazlar arasi senkronlanir). */
+    val words: List<LearnedWord> = emptyList(),
+    /** Son "ogrenilen kelimeleri sil" zamani. */
+    val wordsClearedAt: Long = 0,
 ) {
     /** Silinmemis kayitlar. */
     val active: List<ShortcutRecord> get() = shortcuts.filter { !it.deleted }
@@ -287,6 +301,23 @@ object DataOps {
  * Iki cihaz (tablet / Windows) arasinda kisayol birlestirme.
  * Kural: ayni id'de son degistirilen kazanir; silme de bir degisikliktir. Hicbir kayit sessizce kaybolmaz.
  */
+/** Senkron/aktarma: kisayollar + ogrenilen kelimeler birlikte birlestirilir (ayarlar cihaza ozeldir). */
+object DataMerge {
+    class Result(val data: RadExpandData, val shortcuts: SyncMerge.Result, val wordsChanged: Boolean) {
+        val changed: Boolean get() = shortcuts.changed || wordsChanged
+    }
+
+    fun merge(local: RadExpandData, remote: RadExpandData): Result {
+        val s = SyncMerge.merge(local.shortcuts, remote.shortcuts)
+        val w = WordMerge.merge(local.words, local.wordsClearedAt, remote.words, remote.wordsClearedAt)
+        val wordsChanged = w.changed && (w.words.toSet() != local.words.toSet() || w.clearedAt != local.wordsClearedAt)
+        return Result(local.copy(shortcuts = s.shortcuts, words = w.words, wordsClearedAt = w.clearedAt), s, wordsChanged)
+    }
+}
+
+/** Senkron ya da tasima dosyasina yazilacak kisim (ayarlar haric). */
+fun RadExpandData.forSync(): RadExpandData = RadExpandData(shortcuts = shortcuts, words = words, wordsClearedAt = wordsClearedAt)
+
 object SyncMerge {
     data class Result(val shortcuts: List<ShortcutRecord>, val fromRemote: Int, val fromLocal: Int, val changed: Boolean)
 

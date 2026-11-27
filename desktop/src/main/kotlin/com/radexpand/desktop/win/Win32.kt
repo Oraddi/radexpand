@@ -47,6 +47,7 @@ interface User32Extra : StdCallLibrary {
     fun GetCursorPos(p: WinDef.POINT): Boolean
     fun WindowFromPoint(p: WinDef.POINT.ByValue): WinDef.HWND?
     fun GetAncestor(hwnd: WinDef.HWND?, flags: Int): WinDef.HWND?
+    fun ClientToScreen(hwnd: WinDef.HWND?, p: WinDef.POINT): Boolean
 
     companion object {
         val I: User32Extra = Native.load("user32", User32Extra::class.java, W32APIOptions.DEFAULT_OPTIONS)
@@ -142,6 +143,25 @@ object WinProcess {
     }
 
     fun ownPid(): Int = Kernel32.INSTANCE.GetCurrentProcessId()
+
+    /**
+     * Yazi imlecinin ekran konumu (piksel; imlecin alt-sol kosesi). Imleci bildirmeyen programlarda
+     * (bazi tarayicilar) on plandaki pencerenin alt ortasi.
+     */
+    fun caretScreenPos(): Pair<Int, Int>? = runCatching {
+        val u = User32.INSTANCE
+        val fg = u.GetForegroundWindow() ?: return@runCatching null
+        val tid = u.GetWindowThreadProcessId(fg, null)
+        val info = WinUser.GUITHREADINFO()
+        info.cbSize = info.size()
+        if (u.GetGUIThreadInfo(tid, info) && info.hwndCaret != null) {
+            val p = WinDef.POINT(info.rcCaret.left, info.rcCaret.bottom)
+            if (User32Extra.I.ClientToScreen(info.hwndCaret, p)) return@runCatching p.x to p.y
+        }
+        val r = WinDef.RECT()
+        if (!u.GetWindowRect(fg, r)) return@runCatching null
+        ((r.left + r.right) / 2 - 150) to (r.bottom - 140)
+    }.getOrNull()
 
     /** Fare imlecinin altindaki pencere [pid] surecine mi ait. */
     fun cursorOverPid(pid: Int): Boolean = runCatching {

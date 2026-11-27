@@ -204,9 +204,10 @@ private fun TransferScreen(data: RadExpandData, snackbar: SnackbarHostState, pic
             if (text.removePrefix("﻿").trimStart().startsWith("{")) {
                 runCatching {
                     val other = DataCodec.decode(text)
-                    val r = SyncMerge.merge(DesktopStore.data.value.shortcuts, other.shortcuts)
+                    val m = com.radexpand.core.DataMerge.merge(DesktopStore.data.value, other)
+                    val r = m.shortcuts
                     DesktopStore.backup("json-ice-aktarma-oncesi")
-                    DesktopStore.update { it.copy(shortcuts = r.shortcuts) }
+                    DesktopStore.update { it.copy(shortcuts = m.data.shortcuts, words = m.data.words, wordsClearedAt = m.data.wordsClearedAt) }
                     say(t("${f.name}: ${r.fromRemote} kısayol eklendi/güncellendi.", "${f.name}: ${r.fromRemote} shortcuts added/updated."))
                 }.onFailure { say(t("${f.name} bir RadExpand dosyası değil.", "${f.name} is not a RadExpand file.")) }
             } else {

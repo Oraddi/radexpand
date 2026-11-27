@@ -208,6 +208,42 @@ fun SettingsScreen(data: RadExpandData, store: DataStore, platform: PlatformSett
             }
         }
 
+        // ------------------------------------------------------------ kelime onerisi
+        SectionTitle(t("Kelime önerisi", "Word suggestions"))
+        SwitchRow(
+            t("Yazarken kelime öner", "Suggest words while typing"),
+            t("Bir kelimenin ilk harflerini yazınca tamamını önerir (ör. \"mut\" → \"mutfak\"). Tab ile kabul edilir; yazdığınız bir kısayolsa Tab önce kısayolu genişletir.", "Suggests the whole word after its first letters (e.g. \"radi\" → \"radiology\"). Accept with Tab; if what you typed is a shortcut, Tab expands the shortcut first."),
+            s.suggestionsEnabled,
+        ) { v -> set { it.copy(suggestionsEnabled = v) } }
+        if (s.suggestionsEnabled) {
+            ChoiceRow(t("Kaç harften sonra", "After how many letters")) {
+                listOf(2, 3, 4).forEach { n -> FilterChip(s.suggestMinLetters == n, { set { it.copy(suggestMinLetters = n) } }, { Text("$n") }) }
+            }
+            SwitchRow(
+                t("Tıp ve radyoloji terimleri", "Medical and radiology terms"),
+                t("Hiperintens, parankim, lenfadenopati gibi yaklaşık 950 terim (Türkçe ve İngilizce).", "About 950 terms such as hyperintense, parenchyma, lymphadenopathy (Turkish and English)."),
+                s.suggestMedicalList,
+            ) { v -> set { it.copy(suggestMedicalList = v) } }
+            SwitchRow(
+                t("Türkçe genel kelime listesi", "General Turkish word list"),
+                t("En sık kullanılan yaklaşık 47.000 Türkçe kelime (FrequencyWords, CC BY-SA 4.0). Yalnızca arayüz Türkçeyken kullanılır.", "About 47,000 frequent Turkish words (FrequencyWords, CC BY-SA 4.0). Used only when the interface is Turkish."),
+                s.suggestGeneralList,
+            ) { v -> set { it.copy(suggestGeneralList = v) } }
+        }
+        SwitchRow(
+            t("Yazdığım kelimeleri öğren", "Learn the words I type"),
+            t(
+                "Sık yazdığınız kelimeler öneride öne çıkar (en az 2 kez yazılan kelimeler). Kelimeler yalnızca bu cihazda ve kendi senkron / Drive dosyanızda durur; parola alanlarında ve kapalı uygulamalarda öğrenilmez. Şu an ${data.words.size} kelime.",
+                "Words you type often move to the top (after you type them at least twice). They stay only on this device and in your own sync / Drive file; never learned in password fields or turned-off apps. Currently ${data.words.size} words.",
+            ),
+            s.learnWords,
+        ) { v -> set { it.copy(learnWords = v) } }
+        if (data.words.isNotEmpty()) {
+            OutlinedButton(onClick = { store.update { it.copy(words = emptyList(), wordsClearedAt = System.currentTimeMillis()) } }) {
+                Text(t("Öğrenilen kelimeleri sil", "Delete learned words"))
+            }
+        }
+
         // ------------------------------------------------------------ kelime davranislari
         SectionTitle(t("Kelime davranışları", "Word behaviour"))
         SwitchRow(

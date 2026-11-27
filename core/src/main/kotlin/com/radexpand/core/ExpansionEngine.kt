@@ -29,6 +29,21 @@ class ExpansionEngine(
     @Volatile
     var observer: EngineObserver = EngineObserver.NONE
 
+    /** Kelime onerisi kaynagi (platform ayarlar); null ise oneri yok. */
+    @Volatile
+    var suggester: Suggester? = null
+
+    /** Oneriler degisince: (oneriler, yazilan yarim kelime). Bos liste = goster(me). */
+    @Volatile
+    var onSuggestions: ((List<String>, String) -> Unit)? = null
+
+    /** Tamamlanan kelime (ogrenme icin). Parola alaninda ve kapali uygulamada cagrilmaz. */
+    @Volatile
+    var onWordCompleted: ((String) -> Unit)? = null
+
+    private var suggestions: List<String> = emptyList()
+    private var suggestPrefix = ""
+
     private val buf = StringBuilder()
     private var anchored = false
     private var field: FieldInfo? = null
@@ -52,6 +67,7 @@ class ExpansionEngine(
     // ------------------------------------------------------------------ yasam dongusu
 
     fun onStartInput(field: FieldInfo, selStart: Int, selEnd: Int) {
+        clearSuggestions()
         this.field = field
         hasSelection = selStart >= 0 && selStart != selEnd
         last = null
@@ -70,6 +86,7 @@ class ExpansionEngine(
     }
 
     fun onFinishInput() {
+        clearSuggestions()
         field = null
         last = null
         pendingMoves.clear()
@@ -108,8 +125,15 @@ class ExpansionEngine(
             resetBuffer(anchor = false)
             last = null
             pendingMoves.clear()
+            clearSuggestions()
             return false
         }
+        val consumed = handleKey(key, f, port)
+        if (key != KeyInput.Modifier) refreshSuggestions()
+        return consumed
+    }
+
+    private fun handleKey(key: KeyInput, f: FieldInfo, port: EditorPort): Boolean {
         return when (key) {
             is KeyInput.Typed -> onTyped(key.ch, f, port)
             is KeyInput.Trigger -> onTrigger(key.key, f, port)
@@ -133,6 +157,8 @@ class ExpansionEngine(
 
     private fun onTyped(ch: Char, f: FieldInfo, port: EditorPort): Boolean {
         last = null
+        // Harf olmayan bir karakter (noktalama) kelimeyi bitirir: ogrenme
+        if (!ch.isLetter()) completeWord()
         val idx = index
         val cfg = config
         if (!hasSelection) {
@@ -182,6 +208,9 @@ class ExpansionEngine(
             }
         }
         if (m == null) {
+            // Kelime onerisi gorunuyorsa Tab onu kabul eder (kisayol her zaman onceliklidir).
+            if (key == TriggerKey.TAB && suggestions.isNotEmpty() && acceptSuggestion(suggestions[0], port)) return true
+            completeWord()
             // Sablonda sirada bekleyen bir doldurma alani varsa Tab oraya gecer.
             if (key == TriggerKey.TAB && fieldJumps.isNotEmpty()) {
                 val jump = fieldJumps.removeFirst()
@@ -365,6 +394,57 @@ class ExpansionEngine(
         return false
     }
 
+    // ------------------------------------------------------------------ kelime onerisi
+
+    /** Imlecten onceki yarim kelime; kelimenin basi bilinmiyorsa null (yanlis oneri olmasin). */
+    private fun currentWord(): String? {
+        var i = buf.length
+        while (i > 0 && buf[i - 1].isLetter()) i--
+        if (i == buf.length) return null
+        if (i == 0 && !anchored) return null
+        if (i > 0 && (buf[i - 1].isDigit() || config.words.isWordChar(buf[i - 1]))) return null
+        return buf.substring(i)
+    }
+
+    private fun completeWord() {
+        val w = currentWord() ?: return
+        onWordCompleted?.invoke(w)
+    }
+
+    private fun refreshSuggestions() {
+        val s = suggester
+        val w = if (s != null && config.suggestions && !hasSelection) currentWord() else null
+        val list = if (w != null && w.length >= config.suggestMinLetters) s!!.suggest(w) else emptyList()
+        if (list == suggestions && (w ?: "") == suggestPrefix) return
+        suggestions = list
+        suggestPrefix = w ?: ""
+        onSuggestions?.invoke(list, suggestPrefix)
+    }
+
+    private fun clearSuggestions() {
+        if (suggestions.isEmpty()) return
+        suggestions = emptyList()
+        suggestPrefix = ""
+        onSuggestions?.invoke(emptyList(), "")
+    }
+
+    /** Oneriyi yaz: yarim kelimenin kalan harfleri eklenir, imlec kelimenin sonunda kalir. */
+    fun acceptSuggestion(word: String, port: EditorPort): Boolean {
+        val f = field ?: return false
+        if (!activeFor(f) || hasSelection) return false
+        val typed = currentWord() ?: return false
+        if (word.length <= typed.length || !lowerTr(word).startsWith(lowerTr(typed))) return false
+        val rest = word.substring(typed.length)
+        if (!port.replaceBeforeCursor(0, rest, 0)) return false
+        for (c in rest) append(c)
+        addMove(rest.length)
+        last = null
+        onWordCompleted?.invoke(word)
+        diag.log("ÖNERİ kabul edildi (${word.length} harf)")
+        clearSuggestions()
+        return true
+    }
+
     private fun bufferReplace(del: Int, insert: String) {
         if (buf.length >= del) {
             buf.setLength(buf.length - del)
@@ -389,6 +469,7 @@ class ExpansionEngine(
     }
 
     private fun resetBuffer(anchor: Boolean) {
+        clearSuggestions()
         buf.setLength(0)
         anchored = anchor || config.unknownStartIsBoundary
     }

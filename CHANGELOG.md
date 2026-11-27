@@ -1,5 +1,21 @@
 # Değişiklikler / Changelog
 
+## 0.5.0
+
+**Türkçe**
+- **Kelime önerisi** (Google Dokümanlar gibi): bir kelimenin ilk 3 harfini yazınca tamamı önerilir, **Tab** ile kabul edilir. Yazdığınız şey bir kısayolsa Tab her zaman önce kısayolu genişletir.
+  - Kaynaklar: yazdığınız kelimeler (öğrenilir), yaklaşık 950 tıp/radyoloji terimi, kısayol metinlerinizdeki kelimeler, yaklaşık 47.000 kelimelik Türkçe genel liste.
+  - Tablette ekranın altında ince bir öneri çubuğu, Windows'ta yazı imlecinin altında küçük bir kutu çıkar; kelimeye dokunmak/tıklamak da yazar.
+  - Öğrenilen kelimeler yalnızca cihazda ve kendi senkron / Drive dosyanızda durur, cihazlar arasında taşınır; parola alanlarında ve kapalı uygulamalarda öğrenilmez. Ayarlardan kapatılabilir ve silinebilir.
+- Windows: Alt + Space arama penceresi odak almadan çalışır (0.4.3'teki düzeltme).
+
+**English**
+- **Word suggestions** (like Google Docs): after the first 3 letters of a word the whole word is suggested; accept with **Tab**. If what you typed is a shortcut, Tab always expands the shortcut first.
+  - Sources: words you type (learned), about 950 medical/radiology terms, words in your shortcut texts, and a ~47,000-word general Turkish list.
+  - On the tablet a thin suggestion bar appears at the bottom of the screen; on Windows a small box under the text cursor. Tapping/clicking a word also inserts it.
+  - Learned words stay only on the device and in your own sync / Drive file and travel between your devices; never learned in password fields or turned-off apps. Can be turned off and deleted in Settings.
+- Windows: the Alt + Space search window works without taking focus (fix from 0.4.3).
+
 ## 0.4.3
 
 **Türkçe**

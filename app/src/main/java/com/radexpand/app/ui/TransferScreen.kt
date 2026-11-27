@@ -102,9 +102,10 @@ fun TransferScreen(data: RadExpandData, snackbar: SnackbarHostState, pending: Li
             if (text.trimStart().startsWith("{")) {
                 try {
                     val other = DataCodec.decode(text)
-                    val r = SyncMerge.merge(Repo.data.value.shortcuts, other.shortcuts)
+                    val m = com.radexpand.core.DataMerge.merge(Repo.data.value, other)
+                    val r = m.shortcuts
                     Repo.backup("json-ice-aktarma-oncesi")
-                    Repo.update { it.copy(shortcuts = r.shortcuts) }
+                    Repo.update { it.copy(shortcuts = m.data.shortcuts, words = m.data.words, wordsClearedAt = m.data.wordsClearedAt) }
                     say(t("$name: ${r.fromRemote} kısayol eklendi/güncellendi.", "$name: ${r.fromRemote} shortcuts added/updated."))
                 } catch (e: Exception) {
                     say(t("$name bir RadExpand dosyası değil: ${e.message}", "$name is not a RadExpand file: ${e.message}"))

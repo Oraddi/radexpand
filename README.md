@@ -33,6 +33,7 @@ Rapor, şablon ve yazışma gibi tekrar eden metinler için yapıldı. Her progr
 | genişlemeden hemen sonra **Shift + Backspace** | yazdığınız kısayol geri gelir (`rapor` → `rp`); **Backspace** tek başına her zaman normal siler. Geri alma tuşu Ayarlar'dan değiştirilebilir |
 
 - **Tamamen çevrimdışı.** Android uygulamasının internet izni yoktur; yazdıklarınız cihazdan çıkamaz.
+- **Kelime önerisi:** ilk harfleri yazınca kelimenin tamamı önerilir, Tab ile kabul edilir ("mut" → "mutfak"). Yazdığınız kelimeleri öğrenir; tıp/radyoloji terimleri ve Türkçe genel kelime listesi de içerir.
 - **Kısayol arama paneli (Alt + Space):** kayıtlı kısayollar listelenir; yazarak arayın, Enter ile yazdırın (Espanso'daki gibi).
 - **Espanso** dosyalarını (`.yml`) önizlemeyle içe aktarır ve Espanso biçiminde dışa aktarır.
 - **Cihazlar arası taşıma:** Drive masaüstü programı varsa ortak bir dosya üzerinden otomatik; yoksa "Drive'a gönder / Drive'dan al" ile iki tıkla elle. Son değişiklik kazanır, silmeler de taşınır.
@@ -120,6 +121,7 @@ Example: shortcut `rpt` → text `report`
 | **Shift + Backspace** right after an expansion | your abbreviation comes back (`report` → `rpt`); **Backspace** alone always deletes normally. The undo key can be changed in Settings |
 
 - **Fully offline.** The Android app has no internet permission; what you type cannot leave the device.
+- **Word suggestions:** after the first letters the whole word is suggested; accept with Tab. Learns the words you type and includes medical/radiology terms and a general Turkish word list.
 - **Shortcut search panel (Alt + Space):** lists your saved shortcuts; type to search, Enter to insert (like Espanso).
 - Imports **Espanso** files (`.yml`) with a preview and exports to Espanso format.
 - **Moving between devices:** automatic through a shared file if the Drive desktop program is installed; otherwise by hand in two clicks with "Send to Drive / Get from Drive". The latest change wins; deletions are synced too.

@@ -12,6 +12,10 @@ RadExpand aşağıdaki açık kaynak bileşenleri kullanır; her biri kendi lisa
 | SnakeYAML Engine | Android, Windows | Apache License 2.0 |
 | JNA – Java Native Access | Windows | Apache License 2.0 (dual-licensed with LGPL 2.1; used under Apache 2.0) |
 | Eclipse Temurin Java runtime (bundled in the Windows app) | Windows | GPL v2 with Classpath Exception |
+| Turkish word frequency list (`core/src/main/resources/dict/tr_general.txt`), derived from **FrequencyWords** by Hermit Dave (OpenSubtitles 2018). Changes: filtered (short words, digits, foreign letters, offensive words removed), counts removed | Android, Windows | **CC BY-SA 4.0** — https://github.com/hermitdave/FrequencyWords · https://creativecommons.org/licenses/by-sa/4.0/ |
+
+The medical/radiology term lists (`tr_medical.txt`, `en_medical.txt`) were compiled for RadExpand and are covered by the project's MIT licence.
+Tıp/radyoloji terim listeleri RadExpand için derlenmiştir ve projenin MIT lisansı kapsamındadır.
 
 License texts / Lisans metinleri:
 - Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0

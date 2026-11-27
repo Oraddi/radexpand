@@ -159,6 +159,17 @@ object Host {
 
     private val _search = MutableStateFlow<SearchState?>(null)
     val search: StateFlow<SearchState?> get() = _search
+
+    /** Kelime onerisi kutusu: oneriler ve yazi imlecinin ekran konumu (piksel). */
+    data class SuggestionState(val words: List<String>, val x: Int, val y: Int)
+
+    private val _suggestion = MutableStateFlow<SuggestionState?>(null)
+    val suggestion: StateFlow<SuggestionState?> get() = _suggestion
+
+    /** Ogrenilen kelimeler (bellekte); duzenli araliklarla veri dosyasina yazilir. */
+    val learner = com.radexpand.core.WordLearner()
+    private var suggesterKey: Any? = null
+    private val flusher = Executors.newSingleThreadScheduledExecutor { Thread(it, "radexpand-words").apply { isDaemon = true } }
     private var pauseCombo: KeyCombo? = null
     private var hook: KeyboardHook? = null
 
@@ -181,13 +192,29 @@ object Host {
         val d = store.data.value
         engine = ExpansionEngine(d.buildIndex(), d.settings.toEngineConfig(), DesktopDiag)
         engine.observer = DesktopStats
+        learner.mergeFrom(d.words, d.wordsClearedAt)
+        engine.onWordCompleted = { w -> if (settings.learnWords) learner.learn(w, System.currentTimeMillis()) }
+        engine.onSuggestions = { list, _ ->
+            _suggestion.value = if (list.isEmpty()) null else WinProcess.caretScreenPos()?.let { (x, y) -> SuggestionState(list, x, y) }
+        }
+        flusher.scheduleWithFixedDelay({ runCatching { flushWords() } }, 60, 60, java.util.concurrent.TimeUnit.SECONDS)
         apply(d)
         store.addListener { nd -> synchronized(lock) { apply(nd) } }
         hook = KeyboardHook(::onKey, ::onMouseDown).also { it.start() }
         DesktopDiag.log(tx("RadExpand başladı", "RadExpand started") + " (${d.buildIndex().size})")
     }
 
-    fun stop() = hook?.stop()
+    fun stop() {
+        runCatching { flushWords() }
+        hook?.stop()
+    }
+
+    /** Ogrenilen kelimeleri (degistiyse) veri dosyasina yaz; senkron ve Drive'a gonderme bunu tasir. */
+    fun flushWords() {
+        if (!learner.dirty) return
+        val words = learner.snapshot()
+        DesktopStore.update { it.copy(words = words, wordsClearedAt = maxOf(it.wordsClearedAt, learner.clearedAt)) }
+    }
 
     private fun apply(d: RadExpandData) {
         settings = d.settings
@@ -200,6 +227,21 @@ object Host {
         baseConfig = d.settings.toEngineConfig().let { c -> c.copy(disabledPackages = c.disabledPackages.map { it.lowercase() }.toSet(), blindPackages = c.blindPackages.map { it.lowercase() }.toSet()) }
         engine.index = d.buildIndex()
         engine.config = effectiveConfig()
+        learner.mergeFrom(d.words, d.wordsClearedAt)
+        // Oneri kaynaklari yalnizca ilgili ayar ya da kisayol metinleri degisince yeniden kurulur.
+        val s = d.settings
+        val general = s.suggestGeneralList && com.radexpand.core.Lang.defaultFor(s.language) == "tr"
+        val texts = d.active.filter { it.enabled }.map { it.replacement }
+        val key = Triple(general, s.suggestMedicalList, texts.hashCode())
+        if (key != suggesterKey) {
+            suggesterKey = key
+            engine.suggester = com.radexpand.core.Suggester(
+                if (general) com.radexpand.core.WordLists.turkishGeneral else emptyList(),
+                if (s.suggestMedicalList) com.radexpand.core.WordLists.turkishMedical + com.radexpand.core.WordLists.englishMedical else emptyList(),
+                com.radexpand.core.Suggester.wordsOf(texts),
+                learner,
+            )
+        }
     }
 
     private fun effectiveConfig() = if (ownWindow && !testScreenActive) baseConfig.copy(enabled = false) else baseConfig
@@ -223,10 +265,12 @@ object Host {
     }
 
     private fun onMouseDown() {
+        val overOwn = WinProcess.cursorOverPid(ownPid)
         synchronized(lock) {
-            if (::engine.isInitialized) engine.onExternalCursorMove()
+            // RadExpand'in kendi kutularina (oneri, arama) tiklama yazinin yerini degistirmez.
+            if (::engine.isInitialized && !overOwn) engine.onExternalCursorMove()
             // Panel acikken baska bir yere tiklanirsa paneli kapat (panelin kendisine tiklama secim icindir).
-            if (_search.value != null && !WinProcess.cursorOverPid(ownPid)) {
+            if (_search.value != null && !overOwn) {
                 _search.value = null
                 DesktopDiag.log("ARAMA paneli kapandı (tıklama)")
             }
@@ -366,6 +410,19 @@ object Host {
         DesktopStats.onExpansion(st.exe, s.trigger)
         DesktopDiag.log("ARAMA ile yazıldı '${s.trigger}'")
         return listOf(Action.Replace(0, text, back))
+    }
+
+    /** Oneri kutusunda tiklanan kelimeyi yaz. */
+    fun acceptSuggestionAt(index: Int) {
+        val actions: List<Action>
+        synchronized(lock) {
+            val w = _suggestion.value?.words?.getOrNull(index) ?: return
+            port.actions.clear()
+            if (!engine.acceptSuggestion(w, port)) return
+            actions = port.actions.toList()
+            injecting = true
+        }
+        worker.execute { runActions(actions) }
     }
 
     /** Paneli kapat (ornegin pencere kapatilirsa). */

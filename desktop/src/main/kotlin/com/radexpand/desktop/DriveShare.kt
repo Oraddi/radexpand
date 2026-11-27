@@ -3,7 +3,7 @@ package com.radexpand.desktop
 import com.radexpand.core.DataCodec
 import com.radexpand.core.RadExpandData
 import com.radexpand.core.ShortcutRecord
-import com.radexpand.core.SyncMerge
+import com.radexpand.core.forSync
 import com.radexpand.core.tx
 import com.sun.jna.platform.win32.KnownFolders
 import com.sun.jna.platform.win32.Shell32Util
@@ -52,7 +52,7 @@ object DriveShare {
         val d = DesktopStore.data.value
         val out = File(downloads, FILE_NAME)
         val tmp = File(downloads, "$FILE_NAME.tmp")
-        tmp.writeText(DataCodec.encode(RadExpandData(shortcuts = d.shortcuts)), Charsets.UTF_8)
+        tmp.writeText(DataCodec.encode(d.forSync()), Charsets.UTF_8)
         if (out.exists()) out.delete()
         if (!tmp.renameTo(out)) {
             tmp.copyTo(out, overwrite = true)
@@ -72,10 +72,11 @@ object DriveShare {
     /** Drive'dan indirilen dosyayi birlestir. @return kullaniciya gosterilecek ileti */
     fun receive(f: File): String {
         val remote = DataCodec.decode(f.readText(Charsets.UTF_8))
-        val r = SyncMerge.merge(DesktopStore.data.value.shortcuts, remote.shortcuts)
-        if (r.changed) {
-            DesktopStore.backup("drive-alma-oncesi")
-            DesktopStore.update { it.copy(shortcuts = r.shortcuts) }
+        val m = com.radexpand.core.DataMerge.merge(DesktopStore.data.value, remote)
+        val r = m.shortcuts
+        if (m.changed) {
+            if (r.changed) DesktopStore.backup("drive-alma-oncesi")
+            DesktopStore.update { it.copy(shortcuts = m.data.shortcuts, words = m.data.words, wordsClearedAt = m.data.wordsClearedAt) }
         }
         // Dosyadaki hal "gonderilmis" sayilir; bu bilgisayarda dosyada olmayan yenilikler varsa uyari kalir.
         DesktopStore.updatePrefs { it.copy(manualSyncUsed = true, lastSharedStamp = stamp(remote.shortcuts)) }

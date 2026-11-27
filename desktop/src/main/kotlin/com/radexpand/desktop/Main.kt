@@ -108,6 +108,9 @@ fun main(args: Array<String>) {
         val search by Host.search.collectAsState()
         // Her tusta durum degisir; pencere ayni kalir (yeniden olusturulmaz).
         search?.let { st -> com.radexpand.desktop.ui.SearchWindow(st, data.settings) }
+        // Kelime onerisi kutusu (arama paneli acikken gosterilmez)
+        val suggestion by Host.suggestion.collectAsState()
+        com.radexpand.desktop.ui.SuggestionWindow(if (search == null) suggestion else null, data.settings)
         Window(
             onCloseRequest = { visible = false }, // kapatinca tepside calismaya devam eder
             visible = visible,
