@@ -44,6 +44,9 @@ object Vk {
 /** JNA platform kutuphanesinde olmayan user32 fonksiyonlari. */
 interface User32Extra : StdCallLibrary {
     fun GetKeyState(nVirtKey: Int): Short
+    fun GetCursorPos(p: WinDef.POINT): Boolean
+    fun WindowFromPoint(p: WinDef.POINT.ByValue): WinDef.HWND?
+    fun GetAncestor(hwnd: WinDef.HWND?, flags: Int): WinDef.HWND?
 
     companion object {
         val I: User32Extra = Native.load("user32", User32Extra::class.java, W32APIOptions.DEFAULT_OPTIONS)
@@ -139,6 +142,14 @@ object WinProcess {
     }
 
     fun ownPid(): Int = Kernel32.INSTANCE.GetCurrentProcessId()
+
+    /** Fare imlecinin altindaki pencere [pid] surecine mi ait. */
+    fun cursorOverPid(pid: Int): Boolean = runCatching {
+        val p = WinDef.POINT()
+        if (!User32Extra.I.GetCursorPos(p)) return@runCatching false
+        val h = User32Extra.I.WindowFromPoint(WinDef.POINT.ByValue(p.x, p.y)) ?: return@runCatching false
+        pidOf(User32Extra.I.GetAncestor(h, 2) ?: h) == pid // 2 = GA_ROOT
+    }.getOrDefault(false)
 
     fun pidOf(hwnd: WinDef.HWND?): Int {
         if (hwnd == null) return 0

@@ -143,11 +143,22 @@ object Host {
     private var undoCombo: KeyCombo? = null
     private var searchCombo: KeyCombo? = null
 
-    /** Kisayol arama paneli istegi (Alt+Space). [target]: secimden sonra donulecek pencere. */
-    class SearchRequest(val target: WinDef.HWND?, val exe: String, val shortcuts: List<Shortcut>)
+    /**
+     * Kisayol arama paneli (Alt+Space). Pencere odak ALMAZ (Windows arka plandaki programin odak almasina
+     * cogu zaman izin vermez); panel acikken tuslar klavye kancasindan buraya gelir, yazilan programa gitmez.
+     * [target]: secilen metnin yazilacagi pencere (odak zaten onda kalir).
+     */
+    data class SearchState(
+        val target: WinDef.HWND?,
+        val exe: String,
+        val shortcuts: List<Shortcut>,
+        val query: String = "",
+        val selected: Int = 0,
+        val results: List<Shortcut> = emptyList(),
+    )
 
-    private val _search = MutableStateFlow<SearchRequest?>(null)
-    val search: StateFlow<SearchRequest?> get() = _search
+    private val _search = MutableStateFlow<SearchState?>(null)
+    val search: StateFlow<SearchState?> get() = _search
     private var pauseCombo: KeyCombo? = null
     private var hook: KeyboardHook? = null
 
@@ -212,7 +223,14 @@ object Host {
     }
 
     private fun onMouseDown() {
-        synchronized(lock) { if (::engine.isInitialized) engine.onExternalCursorMove() }
+        synchronized(lock) {
+            if (::engine.isInitialized) engine.onExternalCursorMove()
+            // Panel acikken baska bir yere tiklanirsa paneli kapat (panelin kendisine tiklama secim icindir).
+            if (_search.value != null && !WinProcess.cursorOverPid(ownPid)) {
+                _search.value = null
+                DesktopDiag.log("ARAMA paneli kapandı (tıklama)")
+            }
+        }
     }
 
     /** lock icinde cagrilir. */
@@ -236,6 +254,8 @@ object Host {
             DesktopDiag.log(if (paused) tx("DURAKLATILDI (kısayol)", "PAUSED (hotkey)") else tx("DEVAM (kısayol)", "RESUMED (hotkey)"))
             return true to emptyList()
         }
+        // Arama paneli acikken tuslar panele gider.
+        _search.value?.let { st -> return searchKey(st, vk, scan) }
         checkForeground()
         if (paused) return false to emptyList()
         // Kisayol arama paneli (varsayilan Alt+Space). RadExpand'in kendi penceresinde ve kapali programlarda acilmaz.
@@ -245,7 +265,8 @@ object Host {
                 swallowedUp += vk
                 // Alt tek basina birakilinca Word vb. menu kisayollarini acmasin: atanmamis bir tus (0xE8) araya girer.
                 worker.execute { Injector.send(Injector.tap(0xE8)) }
-                _search.value = SearchRequest(hwnd, exe.lowercase(), engine.index.byTrigger.values.toList())
+                val all = engine.index.byTrigger.values.toList()
+                _search.value = SearchState(hwnd, exe.lowercase(), all, results = ShortcutSearch.find(all, "", DesktopStats.usage.value))
                 DesktopDiag.log("ARAMA paneli açıldı")
                 return true to emptyList()
             }
@@ -294,26 +315,82 @@ object Host {
         }
     }
 
-    /** Arama panelini kapat; [restoreFocus] ise onceki pencereye don. */
-    fun closeSearch(restoreFocus: Boolean) {
-        val r = _search.value ?: return
-        _search.value = null
-        if (restoreFocus) r.target?.let { t -> worker.execute { User32.INSTANCE.SetForegroundWindow(t) } }
+    /** lock icinde: panel acikken gelen tus. Harfler aramaya yazilir; ↑↓ secer; Enter/Tab yazdirir; Esc kapatir. */
+    private fun searchKey(st: SearchState, vk: Int, scan: Int): Pair<Boolean, List<Action>> {
+        if (vk in Vk.MODIFIERS) return false to emptyList()
+        val mods = WinKeys.mods()
+        if (mods and (KeyCombo.CTRL or KeyCombo.ALT or KeyCombo.META) != 0) {
+            // Alt+Space tekrar: kapat. Alt+Tab, Ctrl+..., Win+...: paneli kapat, tus normal isini yapsin.
+            _search.value = null
+            if (WinKeys.isCombo(vk, searchCombo)) {
+                swallowedUp += vk
+                return true to emptyList()
+            }
+            return false to emptyList()
+        }
+        swallowedUp += vk
+        fun moveTo(i: Int) {
+            _search.value = st.copy(selected = i.coerceIn(0, (st.results.size - 1).coerceAtLeast(0)))
+        }
+        fun setQuery(q: String) {
+            _search.value = st.copy(query = q, selected = 0, results = ShortcutSearch.find(st.shortcuts, q, DesktopStats.usage.value))
+        }
+        when (vk) {
+            0x1B -> { // Esc
+                _search.value = null
+                DesktopDiag.log("ARAMA paneli kapandı (Esc)")
+            }
+            Vk.RETURN, Vk.TAB -> {
+                _search.value = null
+                val s = st.results.getOrNull(st.selected) ?: return true to emptyList()
+                return true to searchOutput(st, s)
+            }
+            0x26 -> moveTo(st.selected - 1) // yukari
+            0x28 -> moveTo(st.selected + 1) // asagi
+            0x21 -> moveTo(st.selected - 8) // Page Up
+            0x22 -> moveTo(st.selected + 8) // Page Down
+            Vk.BACK -> if (st.query.isNotEmpty()) setQuery(st.query.dropLast(1))
+            else -> when (val k = WinKeys.map(vk, scan)) {
+                is com.radexpand.core.KeyInput.Typed -> if (st.query.length < 60) setQuery(st.query + k.ch)
+                is com.radexpand.core.KeyInput.Trigger -> if (k.key == TriggerKey.SPACE && st.query.isNotEmpty()) setQuery(st.query + " ")
+                else -> Unit
+            }
+        }
+        return true to emptyList()
     }
 
-    /** Arama panelinde secilen kisayolu onceki pencereye yaz. */
-    fun pickSearch(s: Shortcut) {
-        val r = _search.value ?: return
-        _search.value = null
+    /** lock icinde: secilen kisayolun yazilacak metni. */
+    private fun searchOutput(st: SearchState, s: Shortcut): List<Action> {
         val (text, back) = ShortcutSearch.output(s)
+        engine.onExternalCursorMove()
+        DesktopStats.onExpansion(st.exe, s.trigger)
+        DesktopDiag.log("ARAMA ile yazıldı '${s.trigger}'")
+        return listOf(Action.Replace(0, text, back))
+    }
+
+    /** Paneli kapat (ornegin pencere kapatilirsa). */
+    fun closeSearch() {
+        synchronized(lock) { _search.value = null }
+    }
+
+    /** Panelde fareyle tiklanan satiri yaz. Tiklama odagi panele aldiysa once eski pencereye donulur. */
+    fun pickSearchAt(index: Int) {
+        val actions: List<Action>
+        val st: SearchState
+        synchronized(lock) {
+            st = _search.value ?: return
+            val s = st.results.getOrNull(index) ?: return
+            _search.value = null
+            actions = searchOutput(st, s)
+        }
         worker.execute {
-            r.target?.let { User32.INSTANCE.SetForegroundWindow(it) }
-            Thread.sleep(150) // pencere one gelsin
+            val t = st.target
+            if (t != null && User32.INSTANCE.GetForegroundWindow() != t) {
+                User32.INSTANCE.SetForegroundWindow(t)
+                Thread.sleep(150)
+            }
             synchronized(lock) { injecting = true }
-            runActions(listOf(Action.Replace(0, text, back)))
-            synchronized(lock) { if (::engine.isInitialized) engine.onExternalCursorMove() }
-            DesktopStats.onExpansion(r.exe, s.trigger)
-            DesktopDiag.log("ARAMA ile yazıldı '${s.trigger}'")
+            runActions(actions)
         }
     }
 

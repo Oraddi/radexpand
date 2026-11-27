@@ -1,5 +1,13 @@
 # Değişiklikler / Changelog
 
+## 0.4.3
+
+**Türkçe**
+- Windows: **Alt + Space arama penceresi düzeltildi.** Windows, arka planda çalışan bir programın odak almasına çoğu zaman izin vermediği için pencere açılıyor ama yazılanları ve Esc'i almıyordu. Artık pencere odak almaz; panel açıkken tuşları RadExpand doğrudan işler: yazarak arama, ↑↓, Enter, Esc. Başka bir yere tıklayınca ya da Alt+Tab ile panel kapanır.
+
+**English**
+- Windows: **fixed the Alt + Space search window.** Windows usually does not let a background program take focus, so the window opened but did not receive typing or Esc. The window no longer takes focus; while it is open RadExpand handles the keys itself: type to search, ↑↓, Enter, Esc. Clicking elsewhere or Alt+Tab closes it.
+
 ## 0.4.2
 
 **Türkçe**

@@ -86,7 +86,9 @@ public class WinHarness {
             else if (c == '⏎') vk = 0x0D;  // ⏎
             else if (c == '⇥') vk = 0x09;  // ⇥
             else if (c == '⌫') vk = 0x08;  // ⌫
+            else if (c == '␛') vk = 0x1B;  // Esc
             else if (c == '⇤') { vk = 0x08; shift = true; }  // Shift+Backspace (geri alma)
+            else if (c == '⎇') { evs.Add(Key(0x12, false)); evs.Add(Key(0x20, false)); evs.Add(Key(0x20, true)); evs.Add(Key(0x12, true)); continue; }  // Alt+Space (arama paneli)
             else {
                 int[] m;
                 if (!map.TryGetValue(c, out m)) throw new Exception("Klavye duzeninde yok: " + c);
@@ -174,6 +176,8 @@ $tests = @(
     [pscustomobject]@{ n = 'ri + Space + Backspace'; s = 'ri␣⌫'; e = 'hiperintensite'; b = $false },
     [pscustomobject]@{ n = 'rix + Space'; s = 'rix␣'; e = 'rix '; b = $false },
     [pscustomobject]@{ n = 'Ri + Space'; s = 'Ri␣'; e = 'Hiperintensite '; b = $false },
+    [pscustomobject]@{ n = 'Alt+Space, kcc, Enter, 152 (arama paneli)'; s = '⎇kcc⏎152'; e = 'Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür.'; b = $false },
+    [pscustomobject]@{ n = 'Alt+Space, x, Esc, ri + Space (Esc kapatır)'; s = '⎇x␛ri␣'; e = 'hiperintensite '; b = $false },
     [pscustomobject]@{ n = 'kcc + Space + 152'; s = 'kcc␣152'; e = 'Karaciğer kraniokaudal boyutu 152 mm ölçülmüştür.'; b = $false },
     [pscustomobject]@{ n = 'rtü + Space'; s = 'rtü␣'; e = "Raporda tanımlı bulgular`n`nDr. Ayşe ÖZTÜRK "; b = $false },
     [pscustomobject]@{ n = 'xivd (otomatik, sınır kapalı)'; s = 'xivd'; e = 'xintervertebral disk'; b = $false },
